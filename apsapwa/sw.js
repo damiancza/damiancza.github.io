@@ -2,7 +2,6 @@ var cacheName = 'apsa-congreso';
 var filesToCache = [
   '/',
   '/data/data.json',
-  '/fonts',
   '/fonts/03b48d7ac06a62c5ad76a798683ba177.woff',
   '/fonts/5f48561abb43ace3f2a761ee719f0113.ttf',
   '/fonts/70e013de33c2337bce7d5e97eae856b2.svg',
@@ -18,7 +17,6 @@ var filesToCache = [
   '/img/salas2.jpg',
   '/img/sponsor_footer.png',
   '/img/sponsor2.jpg',
-  '/src/views/activity_view',
   '/src/views/activity_view/activity_view.html',
   '/src/views/autorities_view/autorities_view.html',
   '/src/views/initial_view/initial_view.html',
@@ -37,7 +35,6 @@ var filesToCache = [
   '/style.css.map',
   '/sw.js'
 ];
-
 
 
 /* Start the service worker and cache all of the app's content */
