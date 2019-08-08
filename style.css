@@ -45,6 +45,14 @@
     max-height: none;/* <-- important one  */
 }
 
+
+.row-img {
+    width: 100%;
+}
+.fit-image {
+    width: inherit;
+    min-width: inherit;
+}
 /*!
  * =====================================================
  * Ratchet v2.0.2 (http://goratchet.com)
