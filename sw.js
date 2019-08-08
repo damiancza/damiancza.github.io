@@ -12,6 +12,8 @@ var filesToCache = [
   '/img/icon-96.png',
   '/img/icon-144.png',
   '/img/icon-192.png',
+  '/img/icon-256.png',
+  '/img/icon-512.png',
   '/img/Logo.png',
   '/img/salas1.jpg',
   '/img/salas2.jpg',
