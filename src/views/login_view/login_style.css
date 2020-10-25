@@ -1,0 +1,12 @@
+#login_center {
+    height: 100%;
+    background-color: #bbbbbb;
+}
+
+body {
+    background-color: #bbbbbb;
+}
+
+.column {
+    max-width: 500px;
+}
