@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/icon-152.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Sistema Visitas">
+    <meta name="msapplication-TileImage" content="images/icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+
+    <!-- You MUST include jQuery before Fomantic -->
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
+
+    <style type="text/css">
+        body {
+            background-color: #bbbbbb;
+        }
+
+        .column {
+            margin: 10px;
+        }
+
+        .selpac {
+            margin: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ui borderless menu">
+        <div class="header item">
+            <i class="large calendar alternate outline icon"></i>
+            Sistema Administracion Horaria
+        </div>
+        <div class="right menu">
+            <a href="bienvenido.html" class="ui item">
+                <i class="icon large bell outline"></i>
+            </a>
+            <a href="profile.html" class="ui item">
+                <i class="icon large cog"></i>
+            </a>
+            <a href="index.html" class="ui item">
+                <i class="sign out large alternate icon"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="container selpac">
+        <div class="field">
+            <h3>Seleccione un paciente</h3>
+            <select id="selectpac" class="ui fluid dropdown">
+                <option selected Value="0">Seleccione</option>
+                <option Value="1">Juan Perez</option>
+                <option Value="2">Gonzalo Martinez</option>
+                <option Value="3">Damian Alejandro Czajkovski</option>
+            </select>
+        </div>
+    </div>
+    <div class="ui middle aligned center aligned grid calendario">
+        <div class="column">
+            <div class="ui header">Seleccione una fecha para agregar las visitas</div>
+            <div class="ui calendar" id="inline_calendar"></div>
+        </div>
+    </div>
+    <div class="ui grid calendario tipotarea">
+        <div class="column">
+            <div class="ui calendar" id="inline_calendar"></div>
+
+            <div id="sumario" class="ui segment">
+                <h5>Total de horas: 63hs Total: $23.940,00</h5>
+                <div id="confirma_visita" class="ui  disabled icon red fluid  button">
+                    Confirmar visitas del mes
+                    <i class="icon check"></i>
+                </div>
+                <br>
+                <div id="presentar_factura" class="ui disabled blue fluid  button">
+                    Presentar factura
+                    <i class="icon check"></i>
+                </div>
+                <br>
+                <div id="presentar_informe" class="ui disabled green fluid  button">
+                    Cargar informe
+                    <i class="icon check"></i>
+                </div>
+            </div>
+            <div class="ui icon message">
+                <i class="lock icon"></i>
+                <div class="content">
+                    <div class="header">
+                        Este mes esta cerrado
+                    </div>
+                    <p>Este mes esta listo para la liquidacion.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="importante_modal_dlg" class="ui tiny modal">
+        <div class="header">
+            Importante
+        </div>
+        <div class="content">
+            <div class="ui warning message">
+                <div class="header">
+                    Importante
+                </div>
+                <div class="content">
+                    <p>Debera presentar los horarios correspondientes al mes de Octubre. </p>
+                    <p>El plazo es del 1 al 5 de este mes para presentar las visitas correspondientes al mes de Octubre.
+                    </p>
+                    <p>En caso de pasada esa fecha, los honorarios seran liquidados a partir del 15 del mes siguiente.
+                    </p>
+                </div>
+            </div>
+
+            <!--             <div class="ui error message">
+                <div class="header">
+                    Aviso
+                </div>
+                <ul class="list">
+                    <li>
+                        <a href="calendar">
+                            No se realizo la presentacion de horas del paciente Juan Perez en el mes de Septiembre 2020.
+                        </a>
+                    </li>
+                    <li>
+                        <a href="calendar">
+                            No se realizo la presentacion del informe del paciente Gonzalo Romer en el mes de Septiembre
+                            2020.
+                        </a>
+                    </li>
+                </ul>
+            </div>
+ -->
+        </div>
+        <div class="actions">
+            <div class="ui negative button">
+                Entendido
+            </div>
+        </div>
+    </div>
+
+    <div id="presentacion_modal_dlg" class="ui tiny modal">
+        <div class="header">
+            Presentacion Horaria
+        </div>
+        <div class="content">
+            <h3>Se realizara la presentacion horaria correspondiente al mes de Octubre 2020.</h3>
+            <h3>Se cuenta con un total de 6 horas repartidas entre 40hs. dias de semana y 23hs. fin de semana</h3>
+            <h3>Debera realizar la factura con un importe de:</h3>
+            <h2>$23.940,00</h2>
+            <div class="ui error message">
+                <div class="header">
+                    Aviso
+                </div>
+                <div class="content">
+                    <p>Se realizara la presentacion horaria, una vez confirmada no se podran actualizar ni editar las
+                        visitas del mes.</p>
+                    <p>Para pedir una rectificacion debera comunicarse cone el administrador.</p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui positive button">
+                Confirmar
+            </div>
+        </div>
+    </div>
+
+    <div id="factura_modal_dlg" class="ui tiny modal">
+        <div class="header">
+            Carga de factura
+        </div>
+        <div class="content">
+            <h3>La factura correspondiente a Octubre 2020 debera tener un importe de:</h3>
+            <h2>$23.940,00</h2>
+            <button class="ui huge blue button">Seleccionar archivo</button>
+            <p>factura sept 2020.pdf</p>
+            <div class="ui warning message">
+                <div class="header">
+                    Nota
+                </div>
+                <div class="content">
+                    <p>La carga de la factura se puede realizar varias veces pero se podra confirmar una sola vez.</p>
+                    <p>En caso que se necesite volver a cargar la factura despues de confirmar debera comunicarse cone
+                        el administrador para habilitar la recarga.</p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui positive button">
+                Confirmar
+            </div>
+        </div>
+    </div>
+
+    <div id="informe_modal_dlg" class="ui tiny modal">
+        <div class="header">
+            Carga de informe - Octubre 2020
+        </div>
+        <div class="content">
+            <div class="ui form">
+                <div class="field">
+                    <label>Ingresar informe evolutivo del mes del paciente.</label>
+                    <textarea></textarea>
+                </div>
+            </div>
+
+            <div class="ui warning message">
+                <div class="header">
+                    Nota
+                </div>
+                <div class="content">
+                    <p>En caso que se necesite volver a cargar el informe debera comunicarse con el administrador para
+                        habilitar la carga.</p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui button">
+                Cancelar
+            </div>
+            <div class="ui positive button">
+                Confirmar
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('.calendario').hide();
+
+            // $('#importante_modal_dlg').modal('show');
+            $('.ui.dropdown').dropdown();
+
+            $('#inline_calendar')
+                .calendar({
+                    type: "date",
+                    text: {
+                        days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                        monthsShort: ['En', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        today: 'Hoy',
+                        now: 'Ahora',
+                        am: 'AM',
+                        pm: 'PM'
+                    },
+                    eventDates: [
+                        {
+                            date: new Date(2020, 9, 19),
+                            message: 'Horarios superpuestos',
+                            class: 'inverted orange'
+                        }, {
+                            date: new Date(2020, 9, 24),
+                            message: 'Visitas Cargadas',
+                            class: 'green'
+                        }
+                    ],
+                    onSelect(date, mode) {
+                        window.location = "/visitas.html";
+                    }
+                });
+
+            $("#selectpac").on("change", function (e) {
+                var optionSelected = $("option:selected", this);
+                var valueSelected = this.value;
+
+                if (valueSelected != "0") {
+                    $('.calendario').show();
+                    $('#sumario').show();
+                    if (valueSelected == "1") {
+                        $('.calendario').show();
+                        $('#sumario').hide();
+                    }
+                }
+                else {
+                    $('.calendario').hide();
+                    $('#sumario').hide();
+                }
+            });
+
+            $("#confirma_visita").click(function () {
+                $('#presentacion_modal_dlg').modal('show');
+            });
+
+            $("#presentar_factura").click(function () {
+                $('#factura_modal_dlg').modal('show');
+            });
+
+            $("#presentar_informe").click(function () {
+                $('#informe_modal_dlg').modal('show');
+            });
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker
+                    .register('./sw.js');
+            }
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>

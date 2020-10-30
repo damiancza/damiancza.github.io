@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/icon-152.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Sistema Visitas">
+    <meta name="msapplication-TileImage" content="images/icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+
+    <!-- You MUST include jQuery before Fomantic -->
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
+
+    <style type="text/css">
+        body {
+            background-color: #e4e4e4;
+        }
+
+        .column {
+            margin: 10px;
+        }
+
+        /*
+        .column {
+            max-width: 450px;
+        }
+        */
+    </style>
+</head>
+
+<body>
+    <div class="ui borderless menu">
+        <div class="menu">
+            <a href="calendar" class="item">
+                <i class="icon large chevron left"></i>
+            </a>
+        </div>
+        <div class="right menu">
+            <a href="profile.html" class="ui item">
+                <i class="icon large cog"></i>
+            </a>
+            <a href="index.html" class="ui item">
+                <i class="large sign out alternate icon"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="ui middle aligned left aligned grid">
+        <div class="column">
+
+            <div class="ui  borderless secondary menu">
+                <div class="header item">
+                    <h2 class="ui header">
+                        <div class="content" id="header_text">
+                            Visitas 13 sept
+                        </div>
+                    </h2>
+                </div>
+                <div class="right menu">
+                    <div class="item">
+                        <div id="nueva_visita" class="ui primary icon button">
+                            <i class="icon add"></i>
+                            Nueva Visita
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui divider"></div>
+            <div class="ui segment">
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <button class="ui positive icon button editar_visita">
+                                <i class="icon edit"></i>
+                            </button>
+                            <button class="ui negative icon button borrar_visita">
+                                <i class="icon delete"></i>
+                            </button>
+                        </div>
+                        <i class="large user alternate middle aligned icon"></i>
+                        <div class="content">
+                            <div class="header">Juan Perez</div>
+                            <div class="description">8:30 14:30hs. <b>(2hs.)</b></div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <button class="ui positive icon button editar_visita">
+                                <i class="icon edit"></i>
+                            </button>
+                            <button class="ui negative icon button borrar_visita">
+                                <i class="icon delete"></i>
+                            </button>
+                        </div>
+                        <i class="large user alternate middle aligned icon"></i>
+                        <div class="content">
+                            <div class="header">Gonzalo Martinez</div>
+                            <div class="description"> 16:30 - 20:30 <b>(4hs.)</b></div>
+                        </div>
+                        <a class="ui orange circular label">Superposicion horaria</a>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div id="visita_modal_dlg" class="ui tiny modal">
+        <i class="close icon"></i>
+        <div class="header">
+            Nueva / Editar Visita
+        </div>
+        <div class="content">
+            <div class="ui two column grid form">
+                <div class="column two field">
+                    <div class="ui calendar" id="time_calendar_desde">
+                        <div class="ui input left icon">
+                            <i class="time icon"></i>
+                            <input type="time" placeholder="Desde">
+                        </div>
+                    </div>
+                </div>
+                <div class="column two  field">
+                    <div class="ui calendar" id="time_calendar_hasta">
+                        <div class="ui input left icon">
+                            <i class="time icon"></i>
+                            <input type="time" placeholder="Hasta">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui centered grid">
+                <div class="ui statistic">
+                    <div class="label">
+                        Horas
+                    </div>
+                    <div class="value">
+                        4
+                    </div>
+                </div>
+                <div class="row"></div>
+            </div>
+
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancelar
+            </div>
+            <div class="ui positive button">
+                Guardar
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+
+            $('.ui.dropdown').dropdown();
+            $("#nueva_visita").click(function () {
+                $('#visita_modal_dlg').modal({
+                    onShow: () => {
+                    }
+                }).modal('show');
+            });
+
+            $(".editar_visita").click(function () {
+                $('#visita_modal_dlg').modal('show');
+            });
+
+            $(".borrar_visita").click(function () {
+                confirm("Desea borrar la visita?");
+            });
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker
+                    .register('./sw.js');
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

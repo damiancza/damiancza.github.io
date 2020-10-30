@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/icon-152.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="white"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Sistema Visitas">
+    <meta name="msapplication-TileImage" content="images/icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+
+    <!-- You MUST include jQuery before Fomantic -->
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
+
+    <style type="text/css">
+        body {
+            background-color: #bbbbbb;
+        }
+
+        .column {
+            margin: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="ui borderless menu">
+        <div class="menu">
+            <a class="item">
+                <i class="icon large chevron left"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="ui column grid profileform">
+        <div class="column">
+            <h2 class="ui header">
+                <div class="content">
+                    Editar Perfil
+                </div>
+            </h2>
+            <div class="ui grid form">
+                <div class="sixteen wide field">
+                    <label>Nombre completo</label>
+                    <input type="text">
+                </div>
+                <div class="eight wide field">
+                    <label>Fecha Nacimiento</label>
+                    <input type="text">
+                </div>
+                <div class="eight wide field">
+                    <label>Nacionalidad</label>
+                    <select class="ui dropdown">
+                        <option value="">Argentino</option>
+                        <option value="">Uruguayo</option>
+                    </select>
+                </div>
+                <div class="sixteen wide field">
+                    <label>Domicilio</label>
+                    <input type="email">
+                </div>
+                <div class="eight wide field">
+                    <label>Localidad/Barrio</label>
+                    <input type="text">
+                </div>
+                <div class="eight wide field">
+                    <label>DNI</label>
+                    <input type="text">
+                </div>
+                <div class="sixteen wide field">
+                    <label>E-Mail</label>
+                    <input type="email">
+                </div>
+                <div class="eight wide field">
+                    <label>Contrase&ntilde;a</label>
+                    <input type="password" value="fdsfdfsd">
+                </div>
+                <div class="eight wide field">
+                    <label>Repetir Contrase&ntilde;a</label>
+                    <input type="password" value="fdsfdfsd">
+                </div>
+                <div class="eight wide field">
+                    <label>Telefono</label>
+                    <input type="tel">
+                </div>
+                <div class="eight wide field">
+                    <label>Telefono alternativo</label>
+                    <input type="tel">
+                </div>
+                <div class="sixteen wide field">
+                    <label>CBU/Alias</label>
+                    <input type="text" maxlength="50">
+                </div>
+                <div class="eight wide field">
+                    <label>Titular de la cuenta</label>
+                    <input type="text" maxlength="50">
+                </div>
+                <div class="eight wide field">
+                    <label>CUIL/CUIT de la cuenta</label>
+                    <input type="text" maxlength="50">
+                </div>
+                <div style="margin-left: 11px;" class="ui primary button">Confirmar mis datos</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
