@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -19,6 +19,7 @@
     <!-- You MUST include jQuery before Fomantic -->
     <script src="lib/jquery.min.js"></script>
     <script src="lib/semantic.min.js"></script>
+    <script src="lib/moment-with-locales.min.js"></script>
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <style type="text/css">
@@ -49,7 +50,7 @@
             <a href="profile.html" class="ui item">
                 <i class="icon large cog"></i>
             </a>
-            <a href="index.html" class="ui item">
+            <a id="logoutBtn" href="#" class="ui item">
                 <i class="large sign out alternate icon"></i>
             </a>
         </div>
@@ -77,38 +78,7 @@
             </div>
             <div class="ui divider"></div>
             <div class="ui segment">
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="right floated content">
-                            <button class="ui positive icon button editar_visita">
-                                <i class="icon edit"></i>
-                            </button>
-                            <button class="ui negative icon button borrar_visita">
-                                <i class="icon delete"></i>
-                            </button>
-                        </div>
-                        <i class="large user alternate middle aligned icon"></i>
-                        <div class="content">
-                            <div class="header">Juan Perez</div>
-                            <div class="description">8:30 14:30hs. <b>(2hs.)</b></div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <button class="ui positive icon button editar_visita">
-                                <i class="icon edit"></i>
-                            </button>
-                            <button class="ui negative icon button borrar_visita">
-                                <i class="icon delete"></i>
-                            </button>
-                        </div>
-                        <i class="large user alternate middle aligned icon"></i>
-                        <div class="content">
-                            <div class="header">Gonzalo Martinez</div>
-                            <div class="description"> 16:30 - 20:30 <b>(4hs.)</b></div>
-                        </div>
-                        <a class="ui orange circular label">Superposicion horaria</a>
-                    </div>
+                <div id="visitaslist" class="ui relaxed divided list">
                 </div>
             </div>
 
@@ -118,24 +88,26 @@
 
     <div id="visita_modal_dlg" class="ui tiny modal">
         <i class="close icon"></i>
-        <div class="header">
+        <div id="cabecera_visita_dlg" class="header">
             Nueva / Editar Visita
         </div>
         <div class="content">
-            <div class="ui two column grid form">
+            <div id="visitaForm" class="ui two column grid form">
                 <div class="column two field">
-                    <div class="ui calendar" id="time_calendar_desde">
+                    <label for="">Desde</label>
+                    <div class="ui" id="time_calendar_desde">
                         <div class="ui input left icon">
                             <i class="time icon"></i>
-                            <input type="time" placeholder="Desde">
+                            <input id="visita_desde" type="time" name="desde" placeholder="Desde">
                         </div>
                     </div>
                 </div>
                 <div class="column two  field">
-                    <div class="ui calendar" id="time_calendar_hasta">
+                    <label for="">Hasta</label>
+                    <div class="ui" id="time_calendar_hasta">
                         <div class="ui input left icon">
                             <i class="time icon"></i>
-                            <input type="time" placeholder="Hasta">
+                            <input id="visita_hasta" type="time" name="hasta" placeholder="Hasta">
                         </div>
                     </div>
                 </div>
@@ -145,11 +117,12 @@
                     <div class="label">
                         Horas
                     </div>
-                    <div class="value">
-                        4
-                    </div>
+                    <div id="valdiff" class="value">-</div>
                 </div>
                 <div class="row"></div>
+            </div>
+            <div id="message" class="ui negative message" style="display: none;">
+                <p id="responseMessage"> </p>
             </div>
 
         </div>
@@ -157,24 +130,176 @@
             <div class="ui black deny button">
                 Cancelar
             </div>
-            <div class="ui positive button">
+            <div id="guardar_btn" class="ui positive button">
                 Guardar
             </div>
         </div>
     </div>
 
+    <div id="del_visita_modal_dlg" class="ui tiny modal">
+        <i class="close icon"></i>
+        <div class="header">
+            Borrar Visita
+        </div>
+        <div class="content">
+
+            <p>¿Desea borrar la visita seleccionada?</p>
+
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancelar
+            </div>
+            <div id="guardar_btn" class="ui positive button">
+                Guardar
+            </div>
+        </div>
+    </div>
 
     <script>
+        const apiUrl = "https://www.conectat.com.ar/api";
+
+        let visitas = [];
+
+        let hoy = null;
+
+        let date = null;
+        let pac = null;
+        let desde = null;
+        let hasta = null;
+
+        // Get a value from the querystring
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            var items = location.search.substr(1).split("&");
+            for (var index = 0; index < items.length; index++) {
+                tmp = items[index].split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            }
+            return result;
+        }
+
         $(document).ready(function () {
 
+            //Guardamos en la fecha hoy la fecha que viene por parametro
+            date = findGetParameter('date');
+            hoy = moment(date, "YYYYMMDD")._d;//new Date(parseInt(date.substr(0,4)), parseInt(date.substr(4,2)) - 1, parseInt(date.substr(6,2)));
+
+            cargarVisitas();
+
             $('.ui.dropdown').dropdown();
+
             $("#nueva_visita").click(function () {
                 $('#visita_modal_dlg').modal({
                     onShow: () => {
+                        $("#cabecera_visita_dlg").html("Nueva Visita");
+                        $("#guardar_btn").addClass("disabled");
+                        $("#message").hide();
+                        $("#responseMessage").html("");
+                    },
+                    onApprove: function (element) {
+                        let formVisita = $('#visitaForm');
+
+                        // get all values
+                        let allFields = formVisita.form('get values');
+                        console.log(allFields);
+
+                        let user = JSON.parse(localStorage.getItem('user'));
+
+                        let jwtString = `Bearer ${user.jwt}`;
+
+                        let myHeaders = new Headers();
+                        myHeaders.append("Content-Type", "application/json");
+                        myHeaders.append("MyAuthorization", jwtString);
+
+                        let raw = JSON.stringify({ "id_at": user.id, "id_pac": pac, "desde": desde, "hasta": hasta });
+
+                        let requestOptions = {
+                            method: 'POST',
+                            headers: myHeaders,
+                            body: raw,
+                            redirect: 'follow'
+                        };
+
+                        let url = `${apiUrl}/visitas.php`;
+
+                        $("#message").hide();
+                        fetch(url, requestOptions)
+                            .then(function (res) {
+                                return res.json(); //error here
+                            }).then(function (data) {
+                                if (data.message != undefined) {
+                                    $("#message").show();
+                                    $("#responseMessage").html(data.message);
+                                    return false;
+                                }
+
+                                //Si todo salio bien cerramos el dialogo y refrescamos la lista
+                                cargarVisitas();
+                                $('#visita_modal_dlg').modal("hide");
+                                return true;
+                            }).catch((error) => {
+                                console.log(error);
+                                return false;
+                            });
+                        return false;
                     }
                 }).modal('show');
             });
 
+
+            function obtieneDiferencia() {
+                $("#guardar_btn").addClass("disabled");
+                //get values
+                //hoy = new Date();
+                let valdesde = $("#visita_desde").val();
+                let valhasta = $("#visita_hasta").val();
+
+                //create date format
+                if (valdesde == "" || valhasta == "") {
+                    return;
+                }
+                let horadesde = parseInt(valdesde.split(":")[0]);
+                let minudesde = parseInt(valdesde.split(":")[1]);
+
+                let horahasta = parseInt(valhasta.split(":")[0]);
+                let minuhasta = parseInt(valhasta.split(":")[1]);
+
+                let timeStart = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horadesde, minudesde, 0);
+                let timeEnd = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horahasta, minuhasta, 0);
+
+                desde = moment(timeStart).format("YYYY-MM-DD HH:mm");
+                hasta = moment(timeEnd).format("YYYY-MM-DD HH:mm");
+
+                if (timeStart > timeEnd) {
+                    alert("El horario de desdde no puede ser menor a la fecha de hasta.");
+                    $("#visita_desde").val("");
+                    $("#visita_hasta").val("");
+                    $("#valdiff").html("");
+                    return;
+                }
+
+                let diffStr = moment.utc(moment(timeEnd).diff(moment(timeStart))).format("H:m");
+
+                $("#guardar_btn").removeClass("disabled");
+                $("#valdiff").html(diffStr);
+            }
+
+            $("#visita_desde").change(function () {
+                obtieneDiferencia();
+            });
+
+            $("#visita_hasta").change(function () {
+                obtieneDiferencia();
+            });
+
+            $("#logoutBtn").click(function () {
+                localStorage.removeItem("user");
+                window.location.href = "login.html";
+            });
+
+            /*
             $(".editar_visita").click(function () {
                 $('#visita_modal_dlg').modal('show');
             });
@@ -187,7 +312,230 @@
                 navigator.serviceWorker
                     .register('./sw.js');
             }
+            */
         });
+
+        function cargarVisitas() {
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            let jwtString = `Bearer ${user.jwt}`;
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            date = findGetParameter('date');
+            pac = findGetParameter('pac');
+
+            //Actualizamos el titulo
+            date = findGetParameter('date');
+
+            let fechaSeleccionada = moment(date, "YYYYMMDD")._d;
+
+
+            $("#header_text").html("Visitas del " + moment(fechaSeleccionada).locale("es").format("D MMM"));
+
+            let url = `${apiUrl}/visitas.php?date=${date}`;
+            if (pac != null) {
+                url += `&id_pac=${pac}`;
+            }
+
+            visitas = [];
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+                    if (data.message != undefined) {
+                        localStorage.removeItem("user");
+                        window.location.href = "login.html";
+                    }
+                    let visitaslist = document.getElementById("visitaslist");
+
+
+                    visitaslist.innerHTML = "";
+
+                    if (data["length"] === undefined) {
+                        visitaslist.innerHTML = '<p>No hay visitas cargadas.</p>';
+                    }
+
+                    for (i in data) {
+                        let element = data[i];
+                        visitas.push(element);
+
+                        let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Superposicion horaria</a>' : '';
+
+                        let elementTxt = `<div class="item">
+                                              <div class="right floated content">
+                                                  <button data-id="${element.id}" class="ui positive icon button editar_visita">
+                                                      <i data-id="${element.id}" class="icon edit"></i>
+                                                  </button>
+                                                  <button data-id="${element.id}" class="ui negative icon button borrar_visita">
+                                                      <i data-id="${element.id}" class="icon delete"></i>
+                                                  </button>
+                                              </div>
+                                              <i class="large user alternate middle aligned icon"></i>
+                                              <div class="content">
+                                                  <div class="header">${element.iniciales}</div>
+                                                  <div class="description">${element.desde}hs. ${element.hasta}hs. <b>(${element.rango}hs.)</b></div>
+                                              </div>
+                                              ${superpos}
+                                          </div>`;
+
+                        visitaslist.innerHTML += elementTxt;
+                        //let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
+                        //visitaslist.innerHTML += elementTxt;
+                    }
+
+                    $(".borrar_visita").click(function (e) {
+                        delVisita(e.target.dataset.id);
+                    });
+
+                    $(".editar_visita").click(function (e) {
+                        //e.target.dataset.id
+                        editVisita(e.target.dataset.id);
+                    });
+
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+
+        function delVisita(id) {
+
+            $("#del_visita_modal_dlg").modal({
+                onApprove: function (element) {
+                    let formVisita = $('#visitaForm');
+
+                    // get all values
+                    let allFields = formVisita.form('get values');
+
+                    let user = JSON.parse(localStorage.getItem('user'));
+
+                    let jwtString = `Bearer ${user.jwt}`;
+
+                    let myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+                    myHeaders.append("MyAuthorization", jwtString);
+
+                    let requestOptions = {
+                        method: 'DELETE',
+                        headers: myHeaders,
+                        redirect: 'follow'
+                    };
+
+                    let url = `${apiUrl}/visitas.php?id=${id}`;
+
+                    $("#message").hide();
+                    console.log(url);
+
+                    fetch(url, requestOptions)
+                        .then(function (res) {
+                            cargarVisitas();
+                            $('#del_visita_modal_dlg').modal("hide");
+                            return true;
+                            return res.json(); //error here
+                        }).then(function (data) {
+                            if (data.message != undefined) {
+                                $("#message").show();
+                                $("#responseMessage").html(data.message);
+                                return false;
+                            }
+                            return true;
+                            //Si todo salio bien cerramos el dialogo y refrescamos la lista
+                        }).catch((error) => {
+                            console.log(error);
+                            return false;
+                        });
+                    return true;
+                }
+            }).modal('show');
+
+        }
+
+        function editVisita(id) {
+
+            let visit = getVisita(id);
+
+            $('#visita_modal_dlg').modal({
+                onShow: () => {
+
+                    $("#visita_desde").val(visit.desde);
+                    $("#visita_hasta").val(visit.hasta);
+
+                    $("#cabecera_visita_dlg").html("Editar Visita");
+                    $("#guardar_btn").addClass("disabled");
+                    $("#message").hide();
+                    $("#responseMessage").html("");
+                },
+                onApprove: function (element) {
+                    let formVisita = $('#visitaForm');
+
+                    // get all values
+                    let allFields = formVisita.form('get values');
+                    console.log(allFields);
+
+                    let user = JSON.parse(localStorage.getItem('user'));
+
+                    let jwtString = `Bearer ${user.jwt}`;
+
+                    let myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+                    myHeaders.append("MyAuthorization", jwtString);
+
+                    let raw = JSON.stringify({ "id": id, "desde": desde, "hasta": hasta });
+
+                    let requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: raw,
+                        redirect: 'follow'
+                    };
+
+                    //let url = `${apiUrl}/visitas.php&id=${id}`;
+                    let url = `${apiUrl}/visitas.php`;
+
+                    fetch(url, requestOptions)
+                        .then(function (res) {
+                            //Si todo salio bien cerramos el dialogo y refrescamos la lista
+                            cargarVisitas();
+                            $('#visita_modal_dlg').modal("hide");
+                            return res.json(); //error here
+                        }).then(function (data) {
+                            if (data.message != undefined) {
+                                $("#message").show();
+                                $("#responseMessage").html(data.message);
+                                return false;
+                            }
+
+                            return true;
+                        }).catch((error) => {
+                            console.log(error);
+                            return false;
+                        });
+                    return false;
+                }
+            }).modal('show');
+        }
+
+        function getVisita(id) {
+            for (const i in visitas) {
+                if (visitas.hasOwnProperty(i)) {
+                    const element = visitas[i];
+                    if (element.id == id) {
+                        return element;
+                    }
+                }
+            }
+            return null;
+        }
 
     </script>
 

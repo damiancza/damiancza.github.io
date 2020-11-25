@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Principal</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -24,6 +24,11 @@
     <style type="text/css">
         body {
             background-color: #bbbbbb;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
         }
 
         .column {
@@ -32,6 +37,15 @@
 
         .selpac {
             margin: 15px;
+        }
+
+        div.scrollable {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -49,7 +63,7 @@
             <a href="profile.html" class="ui item">
                 <i class="icon large cog"></i>
             </a>
-            <a href="index.html" class="ui item">
+            <a id="logoutBtn" href="#" class="ui item">
                 <i class="sign out large alternate icon"></i>
             </a>
         </div>
@@ -59,47 +73,57 @@
         <div class="field">
             <h3>Seleccione un paciente</h3>
             <select id="selectpac" class="ui fluid dropdown">
-                <option selected Value="0">Seleccione</option>
-                <option Value="1">Juan Perez</option>
-                <option Value="2">Gonzalo Martinez</option>
-                <option Value="3">Damian Alejandro Czajkovski</option>
+                <option selected Value="0">Seleccionar paciente</option>
             </select>
         </div>
     </div>
-    <div class="ui middle aligned center aligned grid calendario">
-        <div class="column">
-            <div class="ui header">Seleccione una fecha para agregar las visitas</div>
-            <div class="ui calendar" id="inline_calendar"></div>
-        </div>
-    </div>
-    <div class="ui grid calendario tipotarea">
-        <div class="column">
-            <div class="ui calendar" id="inline_calendar"></div>
 
-            <div id="sumario" class="ui segment">
-                <h5>Total de horas: 63hs Total: $23.940,00</h5>
-                <div id="confirma_visita" class="ui  disabled icon red fluid  button">
-                    Confirmar visitas del mes
-                    <i class="icon check"></i>
-                </div>
-                <br>
-                <div id="presentar_factura" class="ui disabled blue fluid  button">
-                    Presentar factura
-                    <i class="icon check"></i>
-                </div>
-                <br>
-                <div id="presentar_informe" class="ui disabled green fluid  button">
-                    Cargar informe
-                    <i class="icon check"></i>
-                </div>
-            </div>
-            <div class="ui icon message">
-                <i class="lock icon"></i>
-                <div class="content">
-                    <div class="header">
-                        Este mes esta cerrado
+    <div class="scrollable">
+        <div class="ui middle aligned center aligned grid calendario">
+            <div class="column">
+                <div class="ui secondary menu">
+                    <div class="item prevmonth">
+                        <i class="left chevron icon"></i>
                     </div>
-                    <p>Este mes esta listo para la liquidacion.</p>
+                    <div class="right aligned item">
+                        <div class="ui header">Seleccione una fecha para agregar las visitas</div>
+                    </div>
+                    <div class="right aligned item nextmonth">
+                        <i class="right chevron icon"></i>
+                    </div>
+                </div>
+                <div class="ui calendar" id="inline_calendar"></div>
+            </div>
+        </div>
+        <div class="ui grid calendario tipotarea">
+            <div class="column">
+                <div class="ui calendar" id="inline_calendar"></div>
+
+                <div class="ui segment sumario">
+                    <h5>Total de horas: 63hs Total: $23.940,00</h5>
+                    <div id="confirma_visita" class="ui icon red fluid  button">
+                        Confirmar visitas del mes
+                        <!-- <i class="icon check"></i> -->
+                    </div>
+                    <br>
+                    <div id="presentar_factura" class="ui blue fluid  button">
+                        Presentar factura
+                        <!-- <i class="icon check"></i> -->
+                    </div>
+                    <br>
+                    <div id="presentar_informe" class="ui green fluid  button">
+                        Cargar informe
+                        <!-- <i class="icon check"></i> -->
+                    </div>
+                </div>
+                <div class="ui icon message" style="display: none;">
+                    <i class="lock icon"></i>
+                    <div class="content">
+                        <div class="header">
+                            Este mes esta cerrado
+                        </div>
+                        <p>Este mes esta listo para la liquidacion.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -237,56 +261,47 @@
     </div>
 
     <script>
-        $(document).ready(function () {
-            $('.calendario').hide();
+        const apiUrl = "https://www.conectat.com.ar/api";
+        let pac = null;
 
-            // $('#importante_modal_dlg').modal('show');
+        $(document).ready(function () {
+
+            //Inicializamos los controles
+            $('.calendario').hide();
+            //initializeCalendar([]);
+            $('.sumario').hide();
             $('.ui.dropdown').dropdown();
 
-            $('#inline_calendar')
-                .calendar({
-                    type: "date",
-                    text: {
-                        days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-                        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                        monthsShort: ['En', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                        today: 'Hoy',
-                        now: 'Ahora',
-                        am: 'AM',
-                        pm: 'PM'
-                    },
-                    eventDates: [
-                        {
-                            date: new Date(2020, 9, 19),
-                            message: 'Horarios superpuestos',
-                            class: 'inverted orange'
-                        }, {
-                            date: new Date(2020, 9, 24),
-                            message: 'Visitas Cargadas',
-                            class: 'green'
-                        }
-                    ],
-                    onSelect(date, mode) {
-                        window.location = "/visitas.html";
-                    }
-                });
+            cargarPacientes();
+
+            //cargarVisitasCalendario();
 
             $("#selectpac").on("change", function (e) {
-                var optionSelected = $("option:selected", this);
-                var valueSelected = this.value;
+                let optionSelected = $("option:selected", this);
+                let valueSelected = this.value;
+                pac = valueSelected;
 
-                if (valueSelected != "0") {
+                if (valueSelected == "0") {
+                    cargarVisitasCalendario(null);
                     $('.calendario').show();
-                    $('#sumario').show();
-                    if (valueSelected == "1") {
-                        $('.calendario').show();
-                        $('#sumario').hide();
-                    }
-                }
-                else {
+                } else {
+                    cargarVisitasCalendario(valueSelected);
                     $('.calendario').hide();
-                    $('#sumario').hide();
                 }
+                /*
+                                if (valueSelected != "0") {
+                                    $('.calendario').show();
+                                    $('#sumario').show();
+                                    if (valueSelected == "1") {
+                                        $('.calendario').show();
+                                        $('#sumario').hide();
+                                    }
+                                }
+                                else {
+                                    $('.calendario').hide();
+                                    $('#sumario').hide();
+                                }
+                */
             });
 
             $("#confirma_visita").click(function () {
@@ -301,14 +316,221 @@
                 $('#informe_modal_dlg').modal('show');
             });
 
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker
-                    .register('./sw.js');
-            }
+            $("#presentar_informe").click(function () {
+                $('#informe_modal_dlg').modal('show');
+            });
+
+            $("#logoutBtn").click(function () {
+                localStorage.removeItem("user");
+                window.location.href = "login.html";
+            });
+
+            $(".nextmonth").click(function (e) {
+                e.preventDefault();
+                let hoy = new Date();
+                let curDate = $('#inline_calendar').calendar('get focusDate');
+                var nextDate = curDate.addMonths(1);
+
+                if (hoy.getMonth() == curDate.getMonth()) {
+                    $('.sumario').hide();
+                } else {
+                    $('.sumario').show();
+                }
+
+                $('#inline_calendar').calendar('set date', nextDate);
+            });
+
+            $(".prevmonth").click(function (e) {
+                e.preventDefault();
+                let hoy = new Date();
+                let curDate = $('#inline_calendar').calendar('get focusDate');
+                var nextDate = curDate.addMonths(-1);
+
+                if (hoy.getMonth() == curDate.getMonth()) {
+                    $('.sumario').hide();
+                } else {
+                    $('.sumario').show();
+                }
+
+                $('#inline_calendar').calendar('set date', nextDate);
+            });
+
+            /*
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker
+                                .register('./sw.js');
+                        }
+                        */
+
+
         });
 
+        function cargarPacientes() {
+            let user = JSON.parse(localStorage.getItem('user'));
 
+            let jwtString = `Bearer ${user.jwt}`;
 
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/pacientes.php?at=${user.id}`;
+
+            //*****************************************
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+                    if (data.message != undefined) {
+                        localStorage.removeItem("user");
+                        window.location.href = "login.html";
+                    }
+                    let select = document.getElementById("selectpac");
+
+                    select.innerHTML = '<option selected Value="0">Seleccionar Paciente</option>';
+                    for (i in data) {
+                        let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
+                        select.innerHTML += elementTxt;
+                    }
+
+                    //cargarVisitasCalendario();
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+        function cargarVisitasCalendario(pac) {
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            $('.calendario').hide();
+            let jwtString = `Bearer ${user.jwt}`;
+
+            let myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            let requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/visitas.php`;
+
+            if (pac != undefined) {
+                url = `${apiUrl}/visitas.php?pac=${pac}`
+            }
+
+            //*****************************************
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+                    $('.calendario').show();
+
+                    let events = [];
+
+                    for (const key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            const element = data[key];
+                            let parts = element.dt.split('-');
+
+                            var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+                            let typeClass = element.cantidad_solapados == '0' ? 'green' : 'inverted orange';
+                            let indicador = element.cantidad_solapados == '0' ? 'Visitas' : 'Visitas solapadas';
+                            //class: 'inverted orange'
+                            let event = {
+                                date: mydate,
+                                message: indicador,
+                                class: typeClass
+                            }
+                            events.push(event);
+                        }
+                    }
+
+                    initializeCalendar(events);
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+
+        }
+
+        Date.isLeapYear = function (year) {
+            return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
+        };
+
+        Date.getDaysInMonth = function (year, month) {
+            return [31, (Date.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+        };
+
+        Date.prototype.isLeapYear = function () {
+            return Date.isLeapYear(this.getFullYear());
+        };
+
+        Date.prototype.getDaysInMonth = function () {
+            return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
+        };
+
+        Date.prototype.addMonths = function (value) {
+            var n = this.getDate();
+            this.setDate(1);
+            this.setMonth(this.getMonth() + value);
+            this.setDate(Math.min(n, this.getDaysInMonth()));
+            return this;
+        };
+
+        function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('');
+        }
+
+        function initializeCalendar(events) {
+            let today = new Date();
+            $('#inline_calendar').html('');
+            $('#inline_calendar')
+                .calendar({
+                    type: "day",
+                    inline: true,
+                    disableYear: true,
+                    disableMonth: true,
+                    text: {
+                        days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                        monthsShort: ['En', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        today: 'Hoy',
+                        now: 'Ahora',
+                        am: 'AM',
+                        pm: 'PM'
+                    },
+                    eventDates: events,
+                    maxDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+                    onSelect(date, mode) {
+                        let formatted_date = formatDate(date);
+                        let url = `/visitas.html?date=${formatted_date}&pac=${pac}`;
+                        window.location = url;
+                    },
+                    className: {
+                        prevIcon: '',
+                        nextIcon: ''
+                    }
+                });
+        }
     </script>
 
 </body>
