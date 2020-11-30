@@ -61,17 +61,16 @@
 
             <div class="ui  borderless secondary menu">
                 <div class="header item">
-                    <h2 class="ui header">
+                    <h3 class="ui header">
                         <div class="content" id="header_text">
                             Visitas 13 sept
                         </div>
-                    </h2>
+                    </h3>
                 </div>
                 <div class="right menu">
                     <div class="item">
                         <div id="nueva_visita" class="ui primary icon button">
                             <i class="icon add"></i>
-                            Nueva Visita
                         </div>
                     </div>
                 </div>
@@ -121,6 +120,17 @@
                 </div>
                 <div class="row"></div>
             </div>
+
+            <div id="aviso" class="ui warning message" style="display: none;">
+                <i class="close icon"></i>
+                <div class="header">
+                    ¡Advertencia!
+                </div>
+                <p id="avisoMensaje">
+
+                </p>
+            </div>
+
             <div id="message" class="ui negative message" style="display: none;">
                 <p id="responseMessage"> </p>
             </div>
@@ -248,50 +258,70 @@
                 }).modal('show');
             });
 
-
-            function obtieneDiferencia() {
-                $("#guardar_btn").addClass("disabled");
-                //get values
-                //hoy = new Date();
-                let valdesde = $("#visita_desde").val();
-                let valhasta = $("#visita_hasta").val();
-
-                //create date format
-                if (valdesde == "" || valhasta == "") {
-                    return;
-                }
-                let horadesde = parseInt(valdesde.split(":")[0]);
-                let minudesde = parseInt(valdesde.split(":")[1]);
-
-                let horahasta = parseInt(valhasta.split(":")[0]);
-                let minuhasta = parseInt(valhasta.split(":")[1]);
-
-                let timeStart = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horadesde, minudesde, 0);
-                let timeEnd = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horahasta, minuhasta, 0);
-
-                desde = moment(timeStart).format("YYYY-MM-DD HH:mm");
-                hasta = moment(timeEnd).format("YYYY-MM-DD HH:mm");
-
-                if (timeStart > timeEnd) {
-                    alert("El horario de desdde no puede ser menor a la fecha de hasta.");
-                    $("#visita_desde").val("");
-                    $("#visita_hasta").val("");
-                    $("#valdiff").html("");
-                    return;
-                }
-
-                let diffStr = moment.utc(moment(timeEnd).diff(moment(timeStart))).format("H:m");
-
-                $("#guardar_btn").removeClass("disabled");
-                $("#valdiff").html(diffStr);
-            }
-
             $("#visita_desde").change(function () {
                 obtieneDiferencia();
             });
 
             $("#visita_hasta").change(function () {
                 obtieneDiferencia();
+            });
+
+            $("#visita_desde").blur(function () {
+                validaRangoHorario();
+            });
+
+            $("#visita_hasta").blur(function () {
+                validaRangoHorario();
+
+                if (desde === undefined && hasta === undefined) {
+                    return;
+                }
+
+                //Chequeamos si no hay alguna visita que se solape con la que queremos agregar
+                //hoy = new Date();
+                let user = JSON.parse(localStorage.getItem('user'));
+
+                let jwtString = `Bearer ${user.jwt}`;
+
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("MyAuthorization", jwtString);
+
+                var requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+
+                let desdeq = desde.replace(/\:/g, '').replace(/\-/g, '').replace(/\s/g, '');
+                let hastaq = hasta.replace(/\:/g, '').replace(/\-/g, '').replace(/\s/g, '');
+
+                let url = `${apiUrl}/visitas.php?desde=${desdeq}&hasta=${hastaq}&id_pac=${pac}`;
+
+                fetch(url, requestOptions)
+                    .then(function (res) {
+                        return res.json(); //error here
+                    }).then(function (data) {
+                        console.log(data);
+
+                        if (data.length > 0) {
+                            $("#aviso").show();
+                            let rdesde = data[0].desde.substr(11, 5);
+                            let rhasta = data[0].hasta.substr(11, 5);
+                            let atnombre = data[0].nombre_completo;
+                            let mensaje = `El horario de ${rdesde} a ${rhasta} ya fue tomado por el AT<br>${atnombre}<br>
+                                           Ponerse en contacto con el colega para revisar el horario.<br>
+                                           Para presentar los horarios del mes es necesario
+                                           pedir permiso al administrador para permitir
+                                           superposición horaria con otro colega.`;
+                            $("#avisoMensaje").html(mensaje);
+                        }
+                        return;
+                    }).catch((error) => {
+                        console.log(error);
+                    });
+
+
             });
 
             $("#logoutBtn").click(function () {
@@ -314,6 +344,86 @@
             }
             */
         });
+
+        function obtieneDiferencia() {
+            $("#guardar_btn").addClass("disabled");
+            //get values
+            //hoy = new Date();
+            let valdesde = $("#visita_desde").val();
+            let valhasta = $("#visita_hasta").val();
+
+            //create date format
+            if (valdesde == "" || valhasta == "") {
+                return;
+            }
+            let horadesde = parseInt(valdesde.split(":")[0]);
+            let minudesde = parseInt(valdesde.split(":")[1]);
+
+            let horahasta = parseInt(valhasta.split(":")[0]);
+            let minuhasta = parseInt(valhasta.split(":")[1]);
+
+            let timeStart = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horadesde, minudesde, 0);
+            let timeEnd = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horahasta, minuhasta, 0);
+
+            timeStart = roundTimeQuarterHour(timeStart);
+            timeEnd = roundTimeQuarterHour(timeEnd);
+
+            desde = moment(timeStart).format("YYYY-MM-DD HH:mm");
+            hasta = moment(timeEnd).format("YYYY-MM-DD HH:mm");
+            /*
+                            if (timeStart > timeEnd) {
+                                alert("El horario de desde no puede ser menor a la fecha de hasta.");
+                                $("#visita_desde").val("");
+                                $("#visita_hasta").val("");
+                                $("#valdiff").html("");
+                                return;
+                            }*/
+
+            let diffStr = moment.utc(moment(timeEnd).diff(moment(timeStart))).format("H:m");
+
+            $("#guardar_btn").removeClass("disabled");
+            $("#valdiff").html(diffStr);
+        }
+
+        function redondeaHorario(horario) {
+            let hora = parseInt(horario.split(":")[0]);
+            let minuto = parseInt(horario.split(":")[1]);
+
+            let time = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), hora, minuto, 0);
+
+            time = roundTimeQuarterHour(time);
+
+            let formateado = moment(time).format("HH:mm");
+
+            return formateado;
+        }
+
+        function validaRangoHorario() {
+            $("#aviso").hide();
+
+            $("#guardar_btn").addClass("disabled");
+            //get values
+            //hoy = new Date();
+            let valdesde = $("#visita_desde").val();
+            let valhasta = $("#visita_hasta").val();
+
+            if (valdesde != "") {
+                valdesde = redondeaHorario(valdesde);
+                $("#visita_desde").val(valdesde);
+            }
+
+            if (valhasta != "") {
+                valhasta = redondeaHorario(valhasta);
+                $("#visita_hasta").val(valhasta);
+            }
+
+            if((valdesde != "" && valhasta != "") && 
+               (valdesde == valhasta)) {
+                $("#aviso").show();
+                $("#avisoMensaje").html("El horario desde y hasat no pueden ser iguales.");
+                $("#guardar_btn").addClass("disabled");
+            }
+        }
 
         function cargarVisitas() {
             let user = JSON.parse(localStorage.getItem('user'));
@@ -338,13 +448,9 @@
 
             let fechaSeleccionada = moment(date, "YYYYMMDD")._d;
 
-
             $("#header_text").html("Visitas del " + moment(fechaSeleccionada).locale("es").format("D MMM"));
 
-            let url = `${apiUrl}/visitas.php?date=${date}`;
-            if (pac != null) {
-                url += `&id_pac=${pac}`;
-            }
+            let url = `${apiUrl}/visitas.php?date=${date}&pac=${pac}`;
 
             visitas = [];
             fetch(url, requestOptions)
@@ -368,7 +474,7 @@
                         let element = data[i];
                         visitas.push(element);
 
-                        let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Superposicion horaria</a>' : '';
+                        let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Visita con superposicion horaria</a>' : '';
 
                         let elementTxt = `<div class="item">
                                               <div class="right floated content">
@@ -381,8 +487,8 @@
                                               </div>
                                               <i class="large user alternate middle aligned icon"></i>
                                               <div class="content">
-                                                  <div class="header">${element.iniciales}</div>
-                                                  <div class="description">${element.desde}hs. ${element.hasta}hs. <b>(${element.rango}hs.)</b></div>
+                                                  <div class="header">${element.desde}hs. ${element.hasta}hs.</div>
+                                                  <div class="description">Paciente: ${element.iniciales}, Duracion: <b>(${element.rango}hs.)</b></div>
                                               </div>
                                               ${superpos}
                                           </div>`;
@@ -406,7 +512,6 @@
                     console.log(error);
                 });
         }
-
 
         function delVisita(id) {
 
@@ -537,6 +642,14 @@
             return null;
         }
 
+        function roundTimeQuarterHour(time) {
+            let timeToReturn = new Date(time);
+
+            timeToReturn.setMilliseconds(Math.round(timeToReturn.getMilliseconds() / 1000) * 1000);
+            timeToReturn.setSeconds(Math.round(timeToReturn.getSeconds() / 60) * 60);
+            timeToReturn.setMinutes(Math.round(timeToReturn.getMinutes() / 15) * 15);
+            return timeToReturn;
+        }
     </script>
 
 </body>

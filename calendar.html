@@ -36,7 +36,13 @@
         }
 
         .selpac {
-            margin: 15px;
+            margin: 0 15px 0;
+        }
+
+        .col_cal {
+            margin-top: 0;
+            border-top: 0;
+            padding-top: 0;
         }
 
         div.scrollable {
@@ -70,52 +76,43 @@
     </div>
 
     <div class="container selpac">
-        <div class="field">
+        <div class="inline field">
             <h3>Seleccione un paciente</h3>
             <select id="selectpac" class="ui fluid dropdown">
-                <option selected Value="0">Seleccionar paciente</option>
+                <option Value="0">Todos los pacientes</option>
             </select>
         </div>
     </div>
-
     <div class="scrollable">
         <div class="ui middle aligned center aligned grid calendario">
-            <div class="column">
+            <div class="column col_cal">
+                <div class="ui calendar" id="inline_calendar"></div>
                 <div class="ui secondary menu">
                     <div class="item prevmonth">
-                        <i class="left chevron icon"></i>
+                        <i class="left circular inverted chevron icon"></i>
                     </div>
-                    <div class="right aligned item">
-                        <div class="ui header">Seleccione una fecha para agregar las visitas</div>
-                    </div>
+                    <div class="center aligned item">Seleccionar mes</div>
                     <div class="right aligned item nextmonth">
-                        <i class="right chevron icon"></i>
+                        <i class="right circular inverted chevron icon"></i>
                     </div>
                 </div>
-                <div class="ui calendar" id="inline_calendar"></div>
+
+                <div class="ui segment sumario">
+                    <h5>Total de horas: 63hs Total: $23.940,00</h5>
+
+                    <div class="ui buttons">
+                        <button id="confirma_visita" class="ui red button"><i class="calendar outline icon"></i></button>
+                        <button id="presentar_factura" class="ui blue button"><i class="file invoice outline icon"></i></button>
+                        <button id="presentar_informe" class="ui green button"><i class="edit outline icon"></i></button>
+                      </div>
+                </div>
+
             </div>
         </div>
         <div class="ui grid calendario tipotarea">
             <div class="column">
                 <div class="ui calendar" id="inline_calendar"></div>
 
-                <div class="ui segment sumario">
-                    <h5>Total de horas: 63hs Total: $23.940,00</h5>
-                    <div id="confirma_visita" class="ui icon red fluid  button">
-                        Confirmar visitas del mes
-                        <!-- <i class="icon check"></i> -->
-                    </div>
-                    <br>
-                    <div id="presentar_factura" class="ui blue fluid  button">
-                        Presentar factura
-                        <!-- <i class="icon check"></i> -->
-                    </div>
-                    <br>
-                    <div id="presentar_informe" class="ui green fluid  button">
-                        Cargar informe
-                        <!-- <i class="icon check"></i> -->
-                    </div>
-                </div>
                 <div class="ui icon message" style="display: none;">
                     <i class="lock icon"></i>
                     <div class="content">
@@ -128,6 +125,7 @@
             </div>
         </div>
     </div>
+
 
     <div id="importante_modal_dlg" class="ui tiny modal">
         <div class="header">
@@ -331,7 +329,7 @@
                 let curDate = $('#inline_calendar').calendar('get focusDate');
                 var nextDate = curDate.addMonths(1);
 
-                if (hoy.getMonth() == curDate.getMonth()) {
+                if (hoy.getMonth() <= curDate.getMonth()) {
                     $('.sumario').hide();
                 } else {
                     $('.sumario').show();
@@ -346,7 +344,7 @@
                 let curDate = $('#inline_calendar').calendar('get focusDate');
                 var nextDate = curDate.addMonths(-1);
 
-                if (hoy.getMonth() == curDate.getMonth()) {
+                if (hoy.getMonth() <= curDate.getMonth()) {
                     $('.sumario').hide();
                 } else {
                     $('.sumario').show();
@@ -393,7 +391,7 @@
                     }
                     let select = document.getElementById("selectpac");
 
-                    select.innerHTML = '<option selected Value="0">Seleccionar Paciente</option>';
+                    select.innerHTML = '<option Value="0">Todos los pacientes</option>';
                     for (i in data) {
                         let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
                         select.innerHTML += elementTxt;
@@ -425,7 +423,7 @@
             let url = `${apiUrl}/visitas.php`;
 
             if (pac != undefined) {
-                url = `${apiUrl}/visitas.php?pac=${pac}`
+                url = `${apiUrl}/visitas.php?pac=${pac}&calendarview=1`
             }
 
             //*****************************************
