@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" href="images/icon-152.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="white"/>
+    <meta name="theme-color" content="white" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Sistema Visitas">
@@ -22,9 +22,9 @@
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <link rel="stylesheet" type="text/css" href="lib/slick.min.css" />
-    <link rel="stylesheet" type="text/css" href="lib/slick-theme.css" /> 
+    <link rel="stylesheet" type="text/css" href="lib/slick-theme.css" />
     <script src="lib/slick.min.js"></script>
-    
+
     <style type="text/css">
         body {
             background-color: #bbbbbb;
@@ -49,19 +49,19 @@
 <body>
     <div class="ui borderless menu">
         <div class="right menu">
-            <a class="ui item">
-                <div class="ui button">Saltar</div>
+            <a href="calendar.html" class="ui item">
+                <div id="saltar_btn" class="ui button">Saltar</div>
             </a>
         </div>
 
     </div>
 
 
-    <div class="bienvenido">
-        <div>
+    <div id=bienvenido_container class="bienvenido">
+        <!-- <div>
             <div class="centercontent">
                 <h1>Bienvenido!</h1>
-                <img class="ui image" src="images/welcome1.webp" alt="">
+                <img class="ui image" src="images/paso1.png" alt="">
                 <p>Este es una app para cargar los horarios de tus visitas a los pacientes </p>
             </div>
         </div>
@@ -86,19 +86,23 @@
                 <img class="ui image" src="images/welcome4.webp" alt="">
                 <p>Finalmente se habilita el boton de entendido para que no aparezca mas este tutorial.</p>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <br>
     <div class="ui middle aligned center aligned grid">
-        <a href="calendar.html" id="entendido_button" class="ui big primary button">Entendido!</a>
+        <a id="entendido_button" class="ui big primary button">Entendido!</a>
         <div id="siguiente_button" class="ui big positive button">Siguiente</div>
     </div>
 
     <script>
+        const apiUrl = "https://www.conectat.com.ar/api";
+
         $(document).ready(function () {
 
             $("#entendido_button").hide();
+
+            cargarPaginas();
 
             $("#siguiente_button").click(function (e) {
                 e.preventDefault();
@@ -114,16 +118,75 @@
                 $(".bienvenido").slick("slickNext");
             });
 
-
-            $(".bienvenido").slick({
-                autoplay: false,
-                dots: true,
-                infinite: false,
-                speed: 1000,
-                slidesToShow: 1,
-                
+            $("#entendido_button").click(function () {
+                localStorage.setItem("bienvenido", true);
+                window.location.href = "calendar.html";
             });
+
+            $("#saltar_btn").click(function () {
+                localStorage.setItem("bienvenido", true);
+                window.location.href = "calendar.html";
+            });
+
         });
+
+        function cargarPaginas() {
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            let jwtString = `Bearer ${user.jwt}`;
+
+            let myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            let requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/bienvenidos.php`;
+
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json();
+                }).then(function (data) {
+                    console.log(data);
+
+                    let paginasList = document.getElementById("bienvenido_container");
+
+
+                    paginasList.innerHTML = "";
+
+                    if (data["length"] === undefined) {
+                        paginasList.innerHTML = '<p>No hay paginas guardas.</p>';
+                    }
+
+                    for (i in data) {
+                        let element = data[i];
+
+                        let elementTxt = `<div>
+                                              <div class="centercontent">
+                                                  <h1>${element.titulo}</h1>
+                                                  <img class="ui image" src="${element.imagen}" alt="">
+                                                  <p>${element.descripcion}</p>
+                                              </div>
+                                          </div>`;
+
+                        paginasList.innerHTML += elementTxt;
+                    }
+
+                    $(".bienvenido").slick({
+                        autoplay: false,
+                        dots: true,
+                        infinite: false,
+                        speed: 1000,
+                        slidesToShow: 1,
+
+                    });
+
+                });
+        }
     </script>
 
 </body>

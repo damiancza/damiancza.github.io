@@ -91,7 +91,7 @@
             Nueva / Editar Visita
         </div>
         <div class="content">
-            <div id="visitaForm" class="ui two column grid form">
+            <div id="visita_form" class="ui two column grid form">
                 <div class="column two field">
                     <label for="">Desde</label>
                     <div class="ui" id="time_calendar_desde">
@@ -202,14 +202,14 @@
 
             $("#nueva_visita").click(function () {
                 $('#visita_modal_dlg').modal({
-                    onShow: () => {
+                    onShow: function () {
                         $("#cabecera_visita_dlg").html("Nueva Visita");
                         $("#guardar_btn").addClass("disabled");
                         $("#message").hide();
                         $("#responseMessage").html("");
                     },
                     onApprove: function (element) {
-                        let formVisita = $('#visitaForm');
+                        let formVisita = $('#visita_form');
 
                         // get all values
                         let allFields = formVisita.form('get values');
@@ -417,8 +417,8 @@
                 $("#visita_hasta").val(valhasta);
             }
 
-            if((valdesde != "" && valhasta != "") && 
-               (valdesde == valhasta)) {
+            if ((valdesde != "" && valhasta != "") &&
+                (valdesde == valhasta)) {
                 $("#aviso").show();
                 $("#avisoMensaje").html("El horario desde y hasat no pueden ser iguales.");
                 $("#guardar_btn").addClass("disabled");
@@ -517,7 +517,7 @@
 
             $("#del_visita_modal_dlg").modal({
                 onApprove: function (element) {
-                    let formVisita = $('#visitaForm');
+                    let formVisita = $('#visita_form');
 
                     // get all values
                     let allFields = formVisita.form('get values');
@@ -581,7 +581,7 @@
                     $("#responseMessage").html("");
                 },
                 onApprove: function (element) {
-                    let formVisita = $('#visitaForm');
+                    let formVisita = $('#visita_form');
 
                     // get all values
                     let allFields = formVisita.form('get values');

@@ -49,18 +49,22 @@
   <!--  <script src="js/main.js"></script> -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if(localStorage.getItem("user") === null) {
-          window.location.href = "login.html";
+      if (localStorage.getItem("user") === null) {
+        window.location.href = "login.html";
       } else {
         let user = JSON.parse(localStorage.getItem("user"));
         let expireTime = user.expireAt;
         let currentDate = new Date();
-        let expireAt = new Date(expireTime*1000);
+        let expireAt = new Date(expireTime * 1000);
 
         if (expireAt < currentDate) {
           window.location.href = "login.html";
         } else {
-          window.location.href = "calendar.html";
+          if (localStorage.getItem("bienvenido") === null) {
+            window.location.href = "bienvenido.html";
+          } else {
+            window.location.href = "calendar.html";
+          }
         }
       }
 

@@ -19,6 +19,7 @@
     <!-- You MUST include jQuery before Fomantic -->
     <script src="lib/jquery.min.js"></script>
     <script src="lib/semantic.min.js"></script>
+    <script src="lib/moment-with-locales.min.js"></script>
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <style type="text/css">
@@ -59,12 +60,14 @@
 <body>
     <div class="ui borderless menu">
         <div class="header item">
-            <i class="large calendar alternate outline icon"></i>
+            <i class="large home icon"></i>
             Sistema AT
         </div>
         <div class="right menu">
             <a href="bienvenido.html" class="ui item">
-                <i class="icon large bell outline"></i>
+                <!-- <i class="icon large question outline"></i> -->
+
+                <i class="large question icon"></i>
             </a>
             <a href="profile.html" class="ui item">
                 <i class="icon large cog"></i>
@@ -76,7 +79,7 @@
     </div>
 
     <div class="container selpac">
-        <div class="inline field">
+        <div class="field">
             <h3>Seleccione un paciente</h3>
             <select id="selectpac" class="ui fluid dropdown">
                 <option Value="0">Todos los pacientes</option>
@@ -91,7 +94,9 @@
                     <div class="item prevmonth">
                         <i class="left circular inverted chevron icon"></i>
                     </div>
-                    <div class="center aligned item">Seleccionar mes</div>
+                    <div class="center aligned item">
+                        <h3 class="ui center aligned header"></h3>
+                    </div>
                     <div class="right aligned item nextmonth">
                         <i class="right circular inverted chevron icon"></i>
                     </div>
@@ -100,11 +105,14 @@
                 <div class="ui segment sumario">
                     <h5>Total de horas: 63hs Total: $23.940,00</h5>
 
-                    <div class="ui buttons">
-                        <button id="confirma_visita" class="ui red button"><i class="calendar outline icon"></i></button>
-                        <button id="presentar_factura" class="ui blue button"><i class="file invoice outline icon"></i></button>
-                        <button id="presentar_informe" class="ui green button"><i class="edit outline icon"></i></button>
-                      </div>
+                    <div class="ui huge buttons">
+                        <button id="confirma_visita" class="ui red button"><i
+                                class="calendar outline icon"></i></button>
+                        <button id="presentar_factura" class="ui blue button"><i
+                                class="file invoice outline icon"></i></button>
+                        <button id="presentar_informe" class="ui green button"><i
+                                class="edit outline icon"></i></button>
+                    </div>
                 </div>
 
             </div>
@@ -258,9 +266,29 @@
         </div>
     </div>
 
+    <div id="confirma_salir_dlg" class="ui modal">
+        <div class="header">
+            Advertencia
+        </div>
+        <div class="content">
+            <div class="description">
+                <h2>¿Desea cerrar sesion?</h2>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui negative button">
+                Cancelar
+            </div>
+            <div class="ui positive button">
+                Confirmar
+            </div>
+        </div>
+    </div>
+
     <script>
         const apiUrl = "https://www.conectat.com.ar/api";
         let pac = null;
+        let focusDate = moment();
 
         $(document).ready(function () {
 
@@ -270,9 +298,23 @@
             $('.sumario').hide();
             $('.ui.dropdown').dropdown();
 
+            $('#inline_calendar').calendar('set date', focusDate._d);
+
             cargarPacientes();
 
             //cargarVisitasCalendario();
+            $("#confirma_salir_dlg").modal({
+                onShow: function () {
+                },
+                onDeny: function () {
+                    return true;
+                },
+                onApprove: function () {
+                    localStorage.removeItem("user");
+                    window.location.href = "login.html";
+                    return true;
+                }
+            });
 
             $("#selectpac").on("change", function (e) {
                 let optionSelected = $("option:selected", this);
@@ -319,38 +361,45 @@
             });
 
             $("#logoutBtn").click(function () {
-                localStorage.removeItem("user");
-                window.location.href = "login.html";
+                $("#confirma_salir_dlg").modal("show");
             });
 
             $(".nextmonth").click(function (e) {
                 e.preventDefault();
                 let hoy = new Date();
-                let curDate = $('#inline_calendar').calendar('get focusDate');
-                var nextDate = curDate.addMonths(1);
+                //let curDate = $('#inline_calendar').calendar('get focusDate');
+                focusDate = moment(focusDate).add(1, 'M');
 
-                if (hoy.getMonth() <= curDate.getMonth()) {
-                    $('.sumario').hide();
-                } else {
-                    $('.sumario').show();
+                //Si es mayor al mes actual salimos
+                if (moment(focusDate).isAfter(hoy, 'day')) {
+                    focusDate = moment(focusDate).subtract(1, 'M');
+                    return;
                 }
 
-                $('#inline_calendar').calendar('set date', nextDate);
+                if (moment(focusDate).isSameOrBefore(hoy, 'day')) {
+                    $('.sumario').show();
+                    $('#inline_calendar').calendar('set focusDate', focusDate._d);
+                    $('#inline_calendar').calendar('set date', focusDate._d);
+                    if (moment(focusDate).isSame(hoy, 'day')) {
+                        $('.sumario').hide();
+                    }
+                }
             });
 
             $(".prevmonth").click(function (e) {
                 e.preventDefault();
                 let hoy = new Date();
-                let curDate = $('#inline_calendar').calendar('get focusDate');
-                var nextDate = curDate.addMonths(-1);
+                //let curDate = $('#inline_calendar').calendar('get focusDate');
+                focusDate = moment(focusDate).subtract(1, 'M');
 
-                if (hoy.getMonth() <= curDate.getMonth()) {
-                    $('.sumario').hide();
-                } else {
+                if (moment(focusDate).isBefore(hoy, 'day')) {
                     $('.sumario').show();
-                }
+                    $('#inline_calendar').calendar('set focusDate', focusDate._d);
+                    $('#inline_calendar').calendar('set date', focusDate._d);
 
-                $('#inline_calendar').calendar('set date', nextDate);
+                } else {
+                    $('.sumario').hide();
+                }
             });
 
             /*

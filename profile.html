@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Perfil</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" href="images/icon-152.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="white"/>
+    <meta name="theme-color" content="white" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Sistema Visitas">
@@ -29,91 +29,339 @@
         .column {
             margin: 10px;
         }
-
     </style>
 </head>
 
 <body>
     <div class="ui borderless menu">
         <div class="menu">
-            <a class="item">
+            <a onclick="window.history.back()" class="item">
                 <i class="icon large chevron left"></i>
             </a>
         </div>
     </div>
 
-    <div class="ui column grid profileform">
+    <div class="ui column grid">
         <div class="column">
+            <div id="saveDimmer" class="ui dimmer">
+                <div class="content">
+                    <h2 class="ui inverted icon header">
+                        <i class="save icon"></i>
+                        Guardando perfil
+                    </h2>
+                </div>
+            </div>
             <h2 class="ui header">
                 <div class="content">
                     Editar Perfil
                 </div>
             </h2>
-            <div class="ui grid form">
+            <form id="formulario" class="ui grid form">
                 <div class="sixteen wide field">
                     <label>Nombre completo</label>
-                    <input type="text">
-                </div>
-                <div class="eight wide field">
-                    <label>Fecha Nacimiento</label>
-                    <input type="text">
+                    <input name="nombre_completo" type="text">
                 </div>
                 <div class="eight wide field">
                     <label>Nacionalidad</label>
-                    <select class="ui dropdown">
-                        <option value="">Argentino</option>
-                        <option value="">Uruguayo</option>
-                    </select>
+                    <input name="nacionalidad" type="text">
+                </div>
+                <div class="eight wide field">
+                    <label>Fecha Nacimiento</label>
+                    <input name="fecha_nacimiento" type="date">
                 </div>
                 <div class="sixteen wide field">
                     <label>Domicilio</label>
-                    <input type="email">
+                    <input name="domicilio" type="email">
                 </div>
                 <div class="eight wide field">
                     <label>Localidad/Barrio</label>
-                    <input type="text">
+                    <input name="localidad" type="text">
                 </div>
                 <div class="eight wide field">
                     <label>DNI</label>
-                    <input type="text">
+                    <input name="dni" type="text">
                 </div>
                 <div class="sixteen wide field">
                     <label>E-Mail</label>
-                    <input type="email">
-                </div>
-                <div class="eight wide field">
-                    <label>Contrase&ntilde;a</label>
-                    <input type="password" value="fdsfdfsd">
-                </div>
-                <div class="eight wide field">
-                    <label>Repetir Contrase&ntilde;a</label>
-                    <input type="password" value="fdsfdfsd">
+                    <input name="email" type="email">
                 </div>
                 <div class="eight wide field">
                     <label>Telefono</label>
-                    <input type="tel">
+                    <input name="telefono" type="tel">
                 </div>
                 <div class="eight wide field">
                     <label>Telefono alternativo</label>
-                    <input type="tel">
+                    <input name="telefono_alt" type="tel">
                 </div>
                 <div class="sixteen wide field">
                     <label>CBU/Alias</label>
-                    <input type="text" maxlength="50">
+                    <input name="cbu_alias" type="text" maxlength="50">
                 </div>
                 <div class="eight wide field">
                     <label>Titular de la cuenta</label>
-                    <input type="text" maxlength="50">
+                    <input name="titular_cuenta" type="text" maxlength="50">
                 </div>
                 <div class="eight wide field">
                     <label>CUIL/CUIT de la cuenta</label>
-                    <input type="text" maxlength="50">
+                    <input name="cuil_titular" type="text" maxlength="50">
                 </div>
-                <div style="margin-left: 11px;" class="ui primary button">Confirmar mis datos</div>
+                <div class="row">
+                    <div style="margin-left: 11px;" class="ui error message">
+                        <div class="header">Cabecera
+                        </div>
+                        <div class="content">contenido</div>
+                    </div>
+                </div>
+                <div id="saveProfile" style="margin-left: 11px;" class="ui primary button">Confirmar mis datos</div>
+                <div id="change_password_btn" style="margin-left: 11px;" class="ui green button">Cambiar
+                    contrase&ntilde;a</div>
+            </form>
+
+        </div>
+    </div>
+
+    <div id="change_password_dlg" class="ui tiny modal">
+        <i class="close icon"></i>
+        <div id="cabecera_visita_dlg" class="header">
+            Cambiar contraseña
+        </div>
+        <div class="content">
+            <div id="profile_form" class="ui grid form">
+                <div class="eight wide field">
+                    <label for="">Contrase&ntilde;a</label>
+                    <input name="password" type="password">
+                </div>
+                <div class="eight wide field">
+                    <label for="">Repetir contrase&ntilde;a</label>
+                    <input name="repeat_password" type="password">
+                </div>
+                <div style="margin: 10px;" class="ui error message">
+                    <div class="header"></div>
+                    <div class="content"></div>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancelar
+            </div>
+            <div id="guardar_btn" class="ui positive button">
+                Cambiar
             </div>
         </div>
     </div>
 
+    <script>
+        const apiUrl = "https://www.conectat.com.ar/api";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            $("#change_password_dlg").modal({
+                onShow: function () {
+
+                    $('#profile_form').form({
+                        on: 'blur',
+                        fields: {
+                            password: {
+                                identifier: 'password',
+                                rules: [{
+                                    type: 'empty',
+                                    prompt: 'Por favor ingrese una contraseña'
+                                },
+                                {
+                                    type: 'minLength[6]',
+                                    prompt: 'Su password debe contener al menos {ruleValue} caracteres'
+                                }]
+                            },
+                            repeat_password: {
+                                identifier: 'repeat_password',
+                                rules: [
+                                    {
+                                        type: 'match[password]',
+                                        prompt: 'Por favor ingrese un password igual a la contraseña'
+                                    }
+                                ]
+                            }
+                        }
+                    });
+
+                    $('#profile_form').form("set fields", {
+                        "password": "", "repeat_password": ""
+                    });
+
+
+                },
+                onApprove: function (element) {
+                    let formVisita = $('#profile_form');
+
+                    if (!formVisita.form("validate form")) {
+                        return false;
+                    }
+
+                    // get all values
+                    let allFields = formVisita.form('get values');
+                    console.log(allFields);
+
+                    let user = JSON.parse(localStorage.getItem('user'));
+
+                    let jwtString = `Bearer ${user.jwt}`;
+
+                    let myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+                    myHeaders.append("MyAuthorization", jwtString);
+
+                    let raw = JSON.stringify(allFields);
+
+                    let requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: raw,
+                        redirect: 'follow'
+                    };
+
+                    let url = `${apiUrl}/profile.php`;
+
+                    $("#message").hide();
+                    fetch(url, requestOptions)
+                        .then(function (res) {
+                            $('#change_password_dlg').modal("hide");
+                            return res.json(); //error here
+                        }).then(function (data) {
+                            if (data.message != undefined) {
+                                $("#message").show();
+                                $("#responseMessage").html(data.message);
+                                return false;
+                            }
+
+                            return true;
+                        }).catch((error) => {
+                            console.log(error);
+                            return false;
+                        });
+                    return false;
+                }
+            });
+
+            $('#formulario').form({
+                on: 'blur',
+                fields: {
+                    nombre_completo: {
+                        identifier: 'nombre_completo',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el nombre completo'
+                        }]
+                    },
+                    dni: {
+                        identifier: 'dni',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese su numero de documento'
+                        }]
+                    },
+                    fecha_nacimiento: {
+                        identifier: 'fecha_nacimiento',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese una fecha de nacimiento'
+                        }]
+                    },
+                    email: {
+                        identifier: 'email',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el email'
+                        }]
+                    }
+                }
+            });
+
+            cargarDatosPerfil();
+
+            $("#saveProfile").click(function () {
+                $('#formulario').form("validate form");
+                //$('#formulario1').form("validate form");
+
+                salvarDatosPerfil();
+            });
+
+            $("#change_password_btn").click(function () {
+                $("#change_password_dlg").modal("show");
+            });
+
+        });
+
+        function cargarDatosPerfil() {
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            let jwtString = `Bearer ${user.jwt}`;
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            var requestOptions = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/profile.php`;
+
+            //*****************************************
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+
+                    console.log(data);
+
+                    $('#formulario').form("set values", data[0]);
+
+                    //cargarVisitasCalendario();
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+        function salvarDatosPerfil() {
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            let jwtString = `Bearer ${user.jwt}`;
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            let allValues = $('#formulario').form("get values");
+            let raw = JSON.stringify(allValues);
+
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/profile.php`;
+
+            //*****************************************
+            $("#saveDimmer").addClass("active");
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+
+                    console.log(data);
+                    $("#saveDimmer").removeClass("active");
+
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+    </script>
 </body>
 
 </html>
