@@ -46,14 +46,14 @@
 
     <div class="ui middle aligned center aligned grid">
         <div class="column">
+            <div id="loadingDimmer" class="ui inverted dimmer">
+                <div class="ui text loader">Ingresando</div>
+            </div>
             <h2 class="ui header">
                 <div class="content">
                     Bienvenido
                 </div>
             </h2>
-            <div id="loadingDimmer" class="ui inverted dimmer">
-                <div class="ui text loader">Loading</div>
-            </div>
             <form class="ui large form">
                 <div class="ui basic stacked segment">
                     <div class="field">
@@ -120,7 +120,7 @@
 
             return fetch(apiUrl, requestOptions)
                 .then(response => {
-                    document.getElementById("loadingDimmer").classList.remove("active");
+                    //document.getElementById("loadingDimmer").classList.remove("active");
                     return response.json();
                 })
                 .then(user => {
@@ -128,17 +128,18 @@
                     if (!user.message != undefined) {
                         document.querySelector(".ui.message").style.display = "block";
                         document.getElementById("responseMessage").innerHTML = user.message;
+                        document.getElementById("loadingDimmer").classList.remove("active");
                     } else {
                         document.querySelector(".ui.message").style.display = "none";
                     }
-
+                    
                     // login successful if there's a jwt token in the response
                     if (user.jwt != undefined) {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         localStorage.setItem('user', JSON.stringify(user));
-                        window.location.href = "calendar.html";
+                        window.location.href = "pacientes.html";
                     }
-
+                    
                     return user;
                 });
         }

@@ -25,6 +25,11 @@
     <style type="text/css">
         body {
             background-color: #e4e4e4;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
         }
 
         .column {
@@ -42,7 +47,7 @@
 <body>
     <div class="ui borderless menu">
         <div class="menu">
-            <a href="calendar" class="item">
+            <a onclick="window.history.back();" class="item">
                 <i class="icon large chevron left"></i>
             </a>
         </div>
@@ -58,12 +63,15 @@
 
     <div class="ui middle aligned left aligned grid">
         <div class="column">
+            <div id="loadingDimmer" class="ui inverted dimmer">
+                <div class="ui text loader">Cargando visitas</div>
+            </div>
 
             <div class="ui  borderless secondary menu">
                 <div class="header item">
                     <h3 class="ui header">
                         <div class="content" id="header_text">
-                            Visitas 13 sept
+
                         </div>
                     </h3>
                 </div>
@@ -80,6 +88,15 @@
                 <div id="visitaslist" class="ui relaxed divided list">
                 </div>
             </div>
+            <div id="presentadoBlock" class="ui icon message" style="display: none;">
+                <i class="lock icon"></i>
+                <div class="content">
+                    <div class="header">
+                        Este mes esta cerrado
+                    </div>
+                    <p>Este mes esta bloqueado para editar visitas.</p>
+                </div>
+            </div>
 
 
         </div>
@@ -91,6 +108,9 @@
             Nueva / Editar Visita
         </div>
         <div class="content">
+            <div id="savingDimmer" class="ui inverted dimmer">
+                <div class="ui text loader">Guardando</div>
+            </div>
             <div id="visita_form" class="ui two column grid form">
                 <div class="column two field">
                     <label for="">Desde</label>
@@ -119,6 +139,19 @@
                     <div id="valdiff" class="value">-</div>
                 </div>
                 <div class="row"></div>
+            </div>
+
+            <div class="ui accordion field">
+                <div class="title ">
+                    <i class="icon dropdown"></i>
+                    Detalles extra
+                </div>
+                <div class="content field ">
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" name="gift" tabindex="0" class="hidden">
+                        <label>Acompa&ntilde;amiento en internaci&oacute;n.</label>
+                    </div>
+                </div>
             </div>
 
             <div id="aviso" class="ui warning message" style="display: none;">
@@ -160,7 +193,7 @@
             <div class="ui black deny button">
                 Cancelar
             </div>
-            <div id="guardar_btn" class="ui positive button">
+            <div id="del_guardar_btn" class="ui positive button">
                 Guardar
             </div>
         </div>
@@ -203,17 +236,25 @@
             $("#nueva_visita").click(function () {
                 $('#visita_modal_dlg').modal({
                     onShow: function () {
+                        $('.ui.accordion').accordion();
+                        $('.ui.checkbox').checkbox();
+                        $("#visita_desde").val("");
+                        $("#visita_hasta").val("");
                         $("#cabecera_visita_dlg").html("Nueva Visita");
                         $("#guardar_btn").addClass("disabled");
                         $("#message").hide();
                         $("#responseMessage").html("");
+                        $("#valdiff").html("");
                     },
                     onApprove: function (element) {
                         let formVisita = $('#visita_form');
 
                         // get all values
                         let allFields = formVisita.form('get values');
-                        console.log(allFields);
+
+                        if (!validaRangoHorario()) {
+                            return;
+                        }
 
                         let user = JSON.parse(localStorage.getItem('user'));
 
@@ -235,10 +276,12 @@
                         let url = `${apiUrl}/visitas.php`;
 
                         $("#message").hide();
+                        $("#savingDimmer").addClass("active");
                         fetch(url, requestOptions)
                             .then(function (res) {
                                 return res.json(); //error here
                             }).then(function (data) {
+                                $("#savingDimmer").removeClass("active");
                                 if (data.message != undefined) {
                                     $("#message").show();
                                     $("#responseMessage").html(data.message);
@@ -271,7 +314,9 @@
             });
 
             $("#visita_hasta").blur(function () {
-                validaRangoHorario();
+                if (!validaRangoHorario()) {
+                    return;
+                }
 
                 if (desde === undefined && hasta === undefined) {
                     return;
@@ -302,8 +347,6 @@
                     .then(function (res) {
                         return res.json(); //error here
                     }).then(function (data) {
-                        console.log(data);
-
                         if (data.length > 0) {
                             $("#aviso").show();
                             let rdesde = data[0].desde.substr(11, 5);
@@ -378,6 +421,14 @@
                                 $("#valdiff").html("");
                                 return;
                             }*/
+            if (moment(timeEnd).isBefore(timeStart, 'time')) {
+                $("#aviso").show();
+                $("#avisoMensaje").html("El horario hasta no puede ser menor a desde.");
+                $("#guardar_btn").addClass("disabled");
+            } else {
+                $("#guardar_btn").removeClass("disabled");
+            }
+
 
             let diffStr = moment.utc(moment(timeEnd).diff(moment(timeStart))).format("H:m");
 
@@ -417,12 +468,34 @@
                 $("#visita_hasta").val(valhasta);
             }
 
+            if ((valdesde == "" || valhasta == "")) {
+                return false;
+            }
+
             if ((valdesde != "" && valhasta != "") &&
                 (valdesde == valhasta)) {
                 $("#aviso").show();
-                $("#avisoMensaje").html("El horario desde y hasat no pueden ser iguales.");
+                $("#avisoMensaje").html("El horario desde y hasta no pueden ser iguales.");
                 $("#guardar_btn").addClass("disabled");
             }
+
+            let horadesde = parseInt(valdesde.split(":")[0]);
+            let minudesde = parseInt(valdesde.split(":")[1]);
+
+            let horahasta = parseInt(valhasta.split(":")[0]);
+            let minuhasta = parseInt(valhasta.split(":")[1]);
+
+            let timeStart = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horadesde, minudesde, 0);
+            let timeEnd = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), horahasta, minuhasta, 0);
+
+            if (moment(timeEnd).isBefore(timeStart, 'time')) {
+                $("#aviso").show();
+                $("#avisoMensaje").html("El horario hasta no puede ser menor a desde.");
+                $("#guardar_btn").addClass("disabled");
+            } else {
+                $("#guardar_btn").removeClass("disabled");
+            }
+            return true;
         }
 
         function cargarVisitas() {
@@ -453,6 +526,7 @@
             let url = `${apiUrl}/visitas.php?date=${date}&pac=${pac}`;
 
             visitas = [];
+            $("#loadingDimmer").addClass("active");
             fetch(url, requestOptions)
                 .then(function (res) {
                     return res.json(); //error here
@@ -470,25 +544,31 @@
                         visitaslist.innerHTML = '<p>No hay visitas cargadas.</p>';
                     }
 
+                    let hayPresentados = false;
+
                     for (i in data) {
                         let element = data[i];
                         visitas.push(element);
 
                         let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Visita con superposicion horaria</a>' : '';
 
+                        let presentadoClass = element.presentado == "1" ? "disabled" : "";
+
+                        hayPresentados = element.presentado == "1";
+
                         let elementTxt = `<div class="item">
                                               <div class="right floated content">
-                                                  <button data-id="${element.id}" class="ui positive icon button editar_visita">
+                                                  <button data-id="${element.id}" class="ui positive ${presentadoClass} icon button editar_visita">
                                                       <i data-id="${element.id}" class="icon edit"></i>
                                                   </button>
-                                                  <button data-id="${element.id}" class="ui negative icon button borrar_visita">
+                                                  <button data-id="${element.id}" class="ui negative ${presentadoClass} icon button borrar_visita">
                                                       <i data-id="${element.id}" class="icon delete"></i>
                                                   </button>
                                               </div>
                                               <i class="large user alternate middle aligned icon"></i>
                                               <div class="content">
                                                   <div class="header">${element.desde}hs. ${element.hasta}hs.</div>
-                                                  <div class="description">Paciente: ${element.iniciales}, Duracion: <b>(${element.rango}hs.)</b></div>
+                                                  <div class="description">${element.iniciales}, Duracion: <b>(${element.rango}hs.)</b></div>
                                               </div>
                                               ${superpos}
                                           </div>`;
@@ -496,6 +576,16 @@
                         visitaslist.innerHTML += elementTxt;
                         //let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
                         //visitaslist.innerHTML += elementTxt;
+                    }
+                    $("#loadingDimmer").removeClass("active");
+
+                    //Si hay presentados deshabilito el boton de agregar y muestro la placa de bloqueado
+                    if (hayPresentados) {
+                        $("#presentadoBlock").show();
+                        $("#nueva_visita").addClass("disabled");
+                    } else {
+                        $("#presentadoBlock").hide();
+                        $("#nueva_visita").removeClass("disabled");
                     }
 
                     $(".borrar_visita").click(function (e) {
@@ -541,6 +631,7 @@
                     $("#message").hide();
                     console.log(url);
 
+                    $("#savingDimmer").addClass("active");
                     fetch(url, requestOptions)
                         .then(function (res) {
                             cargarVisitas();
@@ -548,6 +639,7 @@
                             return true;
                             return res.json(); //error here
                         }).then(function (data) {
+                            $("#savingDimmer").removeClass("active");
                             if (data.message != undefined) {
                                 $("#message").show();
                                 $("#responseMessage").html(data.message);
@@ -607,6 +699,7 @@
                     //let url = `${apiUrl}/visitas.php&id=${id}`;
                     let url = `${apiUrl}/visitas.php`;
 
+                    $("#savingDimmer").addClass("active");
                     fetch(url, requestOptions)
                         .then(function (res) {
                             //Si todo salio bien cerramos el dialogo y refrescamos la lista
@@ -614,12 +707,12 @@
                             $('#visita_modal_dlg').modal("hide");
                             return res.json(); //error here
                         }).then(function (data) {
+                            $("#savingDimmer").removeClass("active");
                             if (data.message != undefined) {
                                 $("#message").show();
                                 $("#responseMessage").html(data.message);
                                 return false;
                             }
-
                             return true;
                         }).catch((error) => {
                             console.log(error);

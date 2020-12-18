@@ -37,10 +37,6 @@
             margin: 10px;
         }
 
-        .selpac {
-            margin: 0 15px 0;
-        }
-
         .col_cal {
             margin-top: 0;
             border-top: 0;
@@ -72,9 +68,10 @@
 
 <body>
     <div class="ui borderless menu">
-        <div class="header item">
-            <i class="large home icon"></i>
-            Sistema AT
+        <div class="menu">
+            <a onclick="window.history.back();" class="item">
+                <i class="icon large chevron left"></i>
+            </a>
         </div>
         <div class="right menu">
             <a href="bienvenido.html" class="ui item">
@@ -91,17 +88,10 @@
         </div>
     </div>
 
-    <div class="container selpac">
-        <div class="field">
-            <h3>Seleccione un paciente</h3>
-            <select id="selectpac" class="ui fluid dropdown">
-                <option Value="0">Todos los pacientes</option>
-            </select>
-        </div>
-    </div>
     <div class="scrollable">
         <div class="ui middle aligned center aligned grid calendario">
             <div class="column col_cal">
+                <h3 id="calendario_titulo">Calendario de visitas</h3>
                 <div class="ui calendar" id="inline_calendar"></div>
                 <div class="ui secondary menu">
                     <div class="item prevmonth">
@@ -115,11 +105,10 @@
                     </div>
                 </div>
 
-                <div class="ui segment">
+                <div class="ui segment sumario">
                     <h5 id="summarioHoras">Total de horas: 63hs Total: $23.940,00</h5>
                     <p id="summarioHoras1">ds:<b>16.5</b> - fs:<b>12.5</b> - fe:<b>0</b></p>
-
-                    <div class="ui huge buttons sumario">
+                    <div class="ui huge buttons">
                         <button id="presentar_horarios" class="ui red button"><i
                                 class="calendar outline icon"></i></button>
                         <button id="presentar_factura" class="ui blue button"><i
@@ -141,7 +130,7 @@
                         <div class="header">
                             Este mes esta cerrado
                         </div>
-                        <p>Este mes esta listo para la liquidacion.</p>
+                        <p>Esta listo para la liquidacion.</p>
                     </div>
                 </div>
             </div>
@@ -177,6 +166,9 @@
     <div id="presentacion_modal_dlg" class="ui tiny modal">
         <div class="header">
             Presentacion Horaria
+        </div>
+        <div id="sendingPrDimmer" class="ui inverted dimmer">
+            <div class="ui text loader">Enviando Presentacion</div>
         </div>
         <div id="presentacion_horaria_content" class="content">
             <h4>Se realizara la presentacion horaria correspondiente al mes de Octubre 2020.</h4>
@@ -215,8 +207,11 @@
             Carga de factura
         </div>
         <div class="content">
-            <h3>La factura correspondiente a Octubre 2020 debera tener un importe de:</h3>
-            <h2>$23.940,00</h2>
+            <div id="sendingFactDimmer" class="ui inverted dimmer">
+                <div class="ui text loader">Enviando Factura</div>
+            </div>
+            <h3 id="totalFacturaDescr">La factura correspondiente a Octubre 2020 debera tener un importe de:</h3>
+            <h2 id="totalFactura">$23.940,00</h2>
 
             <form id="formUpload" action="ajaxupload.php" method="post" enctype="multipart/form-data">
                 <input class="ui input" id="factura_file" type="file" accept="image/*,application/pdf" name="facfile" />
@@ -246,13 +241,19 @@
             Carga de informe - Octubre 2020
         </div>
         <div class="content">
-            <div class="ui form">
-                <div class="field">
-                    <label>Ingresar informe evolutivo del mes del paciente.</label>
-                    <textarea></textarea>
-                </div>
+            <div id="sendingInfDimmer" class="ui inverted dimmer">
+                <div class="ui text loader">Guardando</div>
             </div>
 
+            <form id="informe_form" class="ui form">
+                <div class="field">
+                    <label>Ingresar informe evolutivo del mes del paciente.</label>
+                    <textarea id="informe" name="informe"></textarea>
+                </div>
+                <p id="charnum"></p>
+                <div class="ui error message">
+                </div>
+            </form>
             <div class="ui warning message">
                 <div class="header">
                     Nota
@@ -264,7 +265,7 @@
             </div>
         </div>
         <div class="actions">
-            <div class="ui button">
+            <div class="ui negative button">
                 Cancelar
             </div>
             <div class="ui positive button">
@@ -272,6 +273,8 @@
             </div>
         </div>
     </div>
+
+    
 
     <div id="confirma_salir_dlg" class="ui modal">
         <div class="header">
@@ -300,28 +303,33 @@
 
         $(document).ready(function () {
             //Inicializamos los controles
-            $('.calendario').hide();
-            //$('.sumario').hide();
-            $('.ui.dropdown').dropdown();
-
-            //Si selecciono fecha, la guardamos
-            if (localStorage.getItem("focusDate") === null) {
-                focusDate = moment();
-            } else {
-                focusDate = moment(localStorage.getItem("focusDate"));
-            }
+            $("#summarioHoras1").hide();
 
             //Si selecciono fecha, la guardamos
             if (localStorage.getItem("pac") !== null) {
                 pac = localStorage.getItem("pac");
+            } else {
+                pac = findGetParameter("pac");
             }
 
+            cargarVisitasCalendario(pac);
+
+            //Si selecciono fecha, la guardamos
+            if (localStorage.getItem("focusDate") === null) {
+                focusDate = moment();
+                localStorage.setItem("focusDate", focusDate.format("YYYY-MM-DDTHH:mm:ss"));
+            } else {
+                focusDate = moment(localStorage.getItem("focusDate"));
+            }
+
+            //mostrarSumario();
+
             $('#inline_calendar').calendar('set date', focusDate._d);
+
+            // Traemos el estado del mes, si no presento los valores, traemos el estado de la presentacion
             getTotalMonth(focusDate._d);
 
-            cargarPacientes();
-
-            //cargarVisitasCalendario();
+            //Dialogos
             $("#confirma_salir_dlg").modal({
                 onShow: function () {
                 },
@@ -337,9 +345,71 @@
                 }
             });
 
+            $("#factura_modal_dlg").modal({
+                onShow: function () {
+                    let totalFactContent = `$${presentationData["total_pagar"]}`;
+                    totalFactContent = totalFactContent.replace(/\./g, ',');
+
+                    let periodo = focusDate.locale("es").format("MMMM YYYY");
+                    let facturaDescr = `La factura correspondiente a ${periodo} debera tener un importe de:`;
+                    $("#totalFacturaDescr").html(facturaDescr);
+
+                    $("#totalFactura").html(totalFactContent);
+                },
+                onDeny: function () {
+                    return true;
+                },
+                onApprove: function () {
+                    //enviarPresentacion();
+                    return true;
+                }
+            });
+
+            $("#informe_modal_dlg").modal({
+                onShow: function () {
+                    $('#informe_form').form({
+                        on: 'change',
+                        fields: {
+                            informe: {
+                                identifier: 'informe',
+                                rules: [{
+                                    type: 'empty',
+                                    prompt: 'Por favor ingrese algun contenido al informe'
+                                },
+                                {
+                                    type: 'minLength[1500]',
+                                    prompt: 'Su informe debe contener al menos {ruleValue} caracteres'
+                                },
+                                {
+                                    type: 'maxLength[5000]',
+                                    prompt: 'Su informe supera el maximo de {ruleValue} caracteres'
+                                }]
+                            }
+                        }
+                    });
+                },
+                onApprove: function () {
+                    //Chequeamos que se haya ingresado el informe
+                    let formInforme = $('#informe_form');
+
+                    if (!formInforme.form("validate form")) {
+                        return false;
+                    }
+
+                    // get all values
+                    let allFields = formInforme.form('get values');
+                    console.log(allFields);
+
+                    enviarInforme(allFields);
+                    return true;
+                }
+            });
+
             $("#presentacion_modal_dlg").modal({
                 onShow: function () {
-                    let presentacionHorariaContent = `<h4>Se realizara la presentacion horaria correspondiente al mes de Octubre 2020.</h4>
+                    let periodo = focusDate.locale("es").format("MMMM YYYY");
+
+                    let presentacionHorariaContent = `<h4>Se realizara la presentacion horaria correspondiente al mes de ${periodo}</h4>
                                                       <p>Se cuenta con un total de ${presentationData["total_hs"]}hs. repartidas entre: </p>
                                                       <ul>
                                                           <li>${presentationData["total_hs_ds"]}hs. DS x ${presentationData["valor_hora_ds"]} = <strong>$${presentationData["total_pagar_ds"]}</strong></li>
@@ -362,10 +432,8 @@
                                                       </div>`;
                     presentacionHorariaContent = presentacionHorariaContent.replace(/\./g, ',');
 
+
                     $("#presentacion_horaria_content").html(presentacionHorariaContent);
-                },
-                onDeny: function () {
-                    return true;
                 },
                 onApprove: function () {
                     enviarPresentacion();
@@ -373,22 +441,7 @@
                 }
             });
 
-            $("#selectpac").on("change", function (e) {
-                let optionSelected = $("option:selected", this);
-                let valueSelected = this.value;
-                pac = valueSelected;
-
-                localStorage.setItem("pac", pac);
-
-                if (valueSelected == "0") {
-                    $('.calendario').show();
-                    cargarVisitasCalendario(null);
-                } else {
-                    $('.calendario').hide();
-                    cargarVisitasCalendario(valueSelected);
-                }
-            });
-
+            //Eventos
             $("#presentar_horarios").click(function () {
                 $('#presentacion_modal_dlg').modal('show');
             });
@@ -409,63 +462,6 @@
                 $("#confirma_salir_dlg").modal("show");
             });
 
-            $(".nextmonth").click(function (e) {
-                e.preventDefault();
-                let hoy = new Date();
-                //let curDate = $('#inline_calendar').calendar('get focusDate');
-                focusDate = moment(focusDate).add(1, 'M');
-
-                localStorage.setItem("focusDate", focusDate.format("YYYY-MM-DDTHH:mm:ss"));
-
-                //Si es mayor al mes actual salimos
-                if (moment(focusDate).isAfter(hoy, 'day')) {
-                    //focusDate = moment(focusDate).subtract(1, 'M');
-                    focusDate = moment(hoy);
-                    $('#inline_calendar').calendar('set focusDate', focusDate._d);
-                    $('#inline_calendar').calendar('set date', focusDate._d);
-                    $('.sumario').hide();
-                    return;
-                }
-
-                if (moment(focusDate).isSameOrBefore(hoy, 'day')) {
-                    $('.sumario').show();
-                    $('#inline_calendar').calendar('set focusDate', focusDate._d);
-                    $('#inline_calendar').calendar('set date', focusDate._d);
-                    getTotalMonth(focusDate._d);
-                    if (moment(focusDate).isSame(hoy, 'day')) {
-                        $('.sumario').hide();
-                    }
-                } else {
-                    $('.sumario').hide();
-                }
-            });
-
-            $(".prevmonth").click(function (e) {
-                e.preventDefault();
-                let hoy = new Date();
-                //let curDate = $('#inline_calendar').calendar('get focusDate');
-                focusDate = moment(focusDate).subtract(1, 'M');
-
-                localStorage.setItem("focusDate", focusDate.format("YYYY-MM-DDTHH:mm:ss"));
-
-                if (moment(focusDate).isBefore(hoy, 'day')) {
-                    $('.sumario').show();
-                    $('#inline_calendar').calendar('set focusDate', focusDate._d);
-                    $('#inline_calendar').calendar('set date', focusDate._d);
-                    getTotalMonth(focusDate._d);
-
-                } else {
-                    $('.sumario').hide();
-                }
-            });
-
-            /*
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker
-                                .register('./sw.js');
-                        }
-                        */
-
             $('#factura_file').change(function () {
                 let url = `${apiUrl}/facupload.php`;
                 let user = JSON.parse(localStorage.getItem('user'));
@@ -480,6 +476,7 @@
                     },
                     beforeSend: function (jqXHR, settings) {
                         jqXHR.setRequestHeader('MyAuthorization', jwtString);
+                        $("#sendingFactDimmer").addClass("active");
                     },
                     start: function (file) {
                         //upload started
@@ -493,12 +490,18 @@
 
                     success: function (data) {
                         //upload successful
+                        $("#sendingFactDimmer").removeClass("active");
+                        $("#factura_modal_dlg").modal('hide');
+                        getTotalMonth(focusDate._d);
                         console.log("upload successful!");
                         console.log(data);
                     },
 
                     error: function (error) {
                         //upload failed
+                        $("#sendingFactDimmer").removeClass("active");
+                        $("#factura_modal_dlg").modal('hide');
+                        getTotalMonth(focusDate._d);
                         console.log("upload error: " + error.name + ": " + error.message);
                     }
 
@@ -506,51 +509,60 @@
 
             });
 
+            $(".nextmonth").click(function (e) {
+                e.preventDefault();
+
+                //Si es de un mes anterior, aumentamos un mes
+                if (focusDate.isSameOrBefore(moment(), 'month')) {
+                    focusDate = moment(focusDate).add(1, 'M');
+                    // Si la fecha aumentada es mayor al dia de hoy, ponemos la fecha de hoy
+                    if (focusDate.isAfter(moment(), 'day')) {
+                        focusDate = moment();
+                    }
+
+                    saveFocusDate();
+                    setCalFocusDate();
+                }
+
+                getTotalMonth(focusDate._d);
+            });
+
+            $(".prevmonth").click(function (e) {
+                e.preventDefault();
+
+                //Si es de un mes anterior, aumentamos un mes
+                if (focusDate.isSameOrBefore(moment(), 'month')) {
+                    focusDate = moment(focusDate).subtract(1, 'M');
+
+                    saveFocusDate();
+                    setCalFocusDate();
+                }
+
+                getTotalMonth(focusDate._d);
+            });
+
+            $('#informe').keyup(function () {
+                var max = 5000;
+                var len = $(this).val().length;
+                if (len >= max) {
+                    $('#charnum').text(' Superaste el limite');
+                } else {
+                    var char = max - len;
+                    $('#charnum').text('te quedan ' + char + ' caracteres.');
+                }
+            });
         });
 
-        function cargarPacientes() {
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            let jwtString = `Bearer ${user.jwt}`;
-
-            var myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
-            var requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow'
-            };
-
-            let url = `${apiUrl}/pacientes.php?at=${user.id}`;
-
-            //*****************************************
-            fetch(url, requestOptions)
-                .then(function (res) {
-                    return res.json(); //error here
-                }).then(function (data) {
-                    if (data.message != undefined) {
-                        localStorage.removeItem("user");
-                        window.location.href = "login.html";
-                    }
-                    let select = document.getElementById("selectpac");
-
-                    select.innerHTML = '<option Value="0">Todos los pacientes</option>';
-                    for (i in data) {
-                        let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
-                        select.innerHTML += elementTxt;
-                    }
-
-                    //Si recupero el paciente , lo seleccionamos de la lista
-                    if (pac != null) {
-                        $('.ui.dropdown').dropdown("set value", pac);
-                    }
-                    //cargarVisitasCalendario();
-                    return;
-                }).catch((error) => {
-                    console.log(error);
-                });
+        // Get a value from the querystring
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            var items = location.search.substr(1).split("&");
+            for (var index = 0; index < items.length; index++) {
+                tmp = items[index].split("=");
+                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+            }
+            return result;
         }
 
         function cargarVisitasCalendario(pac) {
@@ -707,55 +719,79 @@
 
             let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&presentacion`;
 
+            $("#summarioHoras1").hide();
+
+            //Al mandar, deshabilitamos todo
+            $("#presentar_horarios").addClass("disabled");
+            $("#presentar_factura").addClass("disabled");
+            $("#presentar_informe").addClass("disabled");
+
             fetch(url, requestOptions)
                 .then(function (res) {
                     return res.json(); //error here
                 }).then(function (data) {
+                    $("#summarioHoras1").show();
                     presentationData = data;
+
                     let sumarioHoras = `Total de horas: ${data["total_hs"]}hs Total: $${data["total_pagar"]}`;
+
                     sumarioHoras = sumarioHoras.replace(/\./g, ',');
                     $("#summarioHoras").html(sumarioHoras);
-                    sumarioHoras = `ds:<b>${data["total_hs_ds"]}</b> - fs:<b>${data["total_hs_fs"]}</b> - fe:<b>${data["total_hs_fe"]}</b>`;
+
+                    sumarioHoras = `DS:<b>${data["total_hs_ds"]}hs</b>, FS:<b>${data["total_hs_fs"]}hs</b>, FE:<b>${data["total_hs_fe"]}hs</b> <br>Valor hora: DS:$${data["valor_hora_ds"]}, FS:$${data["valor_hora_fs"]}, FE:$${data["valor_hora_fe"]} `;
                     sumarioHoras = sumarioHoras.replace(/\./g, ',');
                     $("#summarioHoras1").html(sumarioHoras);
+
                     //Si vino el id, deshabilitamos el boton de presentacion
+                    let presento = false;
+                    let facturo = false;
+                    let informo = false;
+                    let tienehoras = false;
+
                     if ("id" in data) {
-                        //Si ya presento, revisamos si ingreso factura
+                        presento = true;
+                        tienehoras = true;
+                        //mostrarSumario(tienehoras);
+                        $(".sumario").show();
+
+                        //Si ya presento, deshabilitamos la presetnacion y revisamos si ingreso factura
                         $("#presentar_horarios").addClass("disabled");
-                        //Si presento factura lo deshabilitamos
+
+                        //Si presento factura deshabilitamos el boton
                         if (data["factura"] == "S") {
+                            facturo = true;
                             $("#presentar_factura").addClass("disabled");
                         } else {
                             $("#presentar_factura").removeClass("disabled");
                         }
                         //Si presento informe deshabilitamos
                         if (data["informe"] == "S") {
+                            informo = true;
                             $("#presentar_informe").addClass("disabled");
-                        } else {
+                        } else if (facturo) {
+                            //Mostrar solo si facturo
                             $("#presentar_informe").removeClass("disabled");
                         }
                     } else {
                         if (data["total_hs"] == 0) {
+                            $(".sumario").hide();
                             $("#presentar_horarios").addClass("disabled");
                             $("#presentar_factura").addClass("disabled");
                             $("#presentar_informe").addClass("disabled");
-
+                            tienehoras = false;
                         } else {
+                            tienehoras = true;
                             $("#presentar_horarios").removeClass("disabled");
-
-                            //Si hay horas, no fue presentado, revisamos si puso factura o informe
-                            if (data["factura"] == "S") {
-                                $("#presentar_factura").addClass("disabled");
-                            } else {
-                                $("#presentar_factura").removeClass("disabled");
-                            }
-                            if (data["informe"] == "S") {
-                                $("#presentar_informe").addClass("disabled");
-                            } else {
-                                $("#presentar_informe").removeClass("disabled");
-                            }
+                            $(".sumario").show();
                         }
+                        //mostrarSumario(tienehoras);
                     }
+
+                    //mostrarSumario(tienehoras);
+
+                    //Ponemos en el titulo de la vista el nombre del paciente.
+                    let titulo = `Calendario de visitas - Paciente ${data["iniciales"]}`;
+                    $("#calendario_titulo").html(titulo);
                     return;
                 }).catch((error) => {
                     console.log(error);
@@ -782,15 +818,75 @@
 
             let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&presentacion`;
 
+            $("#sendingPrDimmer").addClass("active");
             fetch(url, requestOptions)
                 .then(function (res) {
                     return res.json(); //error here
                 }).then(function (data) {
+                    $("#sendingPrDimmer").removeClass("active");
                     $("#presentacion_modal_dlg").modal('hide');
+                    getTotalMonth(focusDate._d);
                     return;
                 }).catch((error) => {
                     console.log(error);
                 });
+        }
+
+        function enviarInforme(informeData) {
+            let idPresentacion = presentationData["id"];
+            let user = JSON.parse(localStorage.getItem('user'));
+
+            let jwtString = `Bearer ${user.jwt}`;
+
+            let myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("MyAuthorization", jwtString);
+
+            let raw = JSON.stringify(informeData);
+
+            let requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+
+            let url = `${apiUrl}/presentaciones.php?id=${idPresentacion}?presentacion&informe`;
+
+            $("#sendingInfDimmer").addClass("active");
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+                    $("#sendingInfDimmer").removeClass("active");
+                    $("#informe_modal_dlg").modal('hide');
+                    getTotalMonth(focusDate._d);
+                    return;
+                }).catch((error) => {
+                    console.log(error);
+                });
+        }
+
+        /*
+        function mostrarSumario(thoras = true) {
+            //Un Dia antes de fin de mes
+            let finMes = moment().endOf('month').subtract(1, 'day');
+
+            if (thoras && (!focusDate.isSame(moment(), 'month') ||
+                focusDate.isSame(finMes, 'day'))) {
+                $('.sumario').show();
+            } else {
+                $('.sumario').hide();
+            }
+        }*/
+
+        function saveFocusDate() {
+            localStorage.setItem("focusDate", focusDate.format("YYYY-MM-DDTHH:mm:ss"));
+        };
+
+        function setCalFocusDate() {
+            $('#inline_calendar').calendar('set focusDate', focusDate._d);
+            $('#inline_calendar').calendar('set date', focusDate._d);
         }
     </script>
 
