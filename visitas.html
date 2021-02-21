@@ -20,6 +20,9 @@
     <script src="lib/jquery.min.js"></script>
     <script src="lib/semantic.min.js"></script>
     <script src="lib/moment-with-locales.min.js"></script>
+    <script src="js/globals.js"></script>
+    <script src="js/utils.js"></script>
+
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <style type="text/css">
@@ -200,8 +203,7 @@
     </div>
 
     <script>
-        const apiUrl = "https://www.conectat.com.ar/api";
-
+        const apiUrl = baseUrl + "/api";
         let visitas = [];
 
         let hoy = null;
@@ -247,6 +249,8 @@
                         $("#valdiff").html("");
                     },
                     onApprove: function (element) {
+                        let user = JSON.parse(localStorage.getItem('user'));
+
                         let formVisita = $('#visita_form');
 
                         // get all values
@@ -256,19 +260,11 @@
                             return;
                         }
 
-                        let user = JSON.parse(localStorage.getItem('user'));
-
-                        let jwtString = `Bearer ${user.jwt}`;
-
-                        let myHeaders = new Headers();
-                        myHeaders.append("Content-Type", "application/json");
-                        myHeaders.append("MyAuthorization", jwtString);
-
                         let raw = JSON.stringify({ "id_at": user.id, "id_pac": pac, "desde": desde, "hasta": hasta });
 
                         let requestOptions = {
                             method: 'POST',
-                            headers: myHeaders,
+                            headers: getMyHeader(),
                             body: raw,
                             redirect: 'follow'
                         };
@@ -348,6 +344,7 @@
                         return res.json(); //error here
                     }).then(function (data) {
                         if (data.length > 0) {
+                            $("#guardar_btn").addClass("disabled");
                             $("#aviso").show();
                             let rdesde = data[0].desde.substr(11, 5);
                             let rhasta = data[0].hasta.substr(11, 5);
@@ -373,14 +370,6 @@
             });
 
             /*
-            $(".editar_visita").click(function () {
-                $('#visita_modal_dlg').modal('show');
-            });
-
-            $(".borrar_visita").click(function () {
-                confirm("Desea borrar la visita?");
-            });
-
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker
                     .register('./sw.js');
@@ -413,14 +402,7 @@
 
             desde = moment(timeStart).format("YYYY-MM-DD HH:mm");
             hasta = moment(timeEnd).format("YYYY-MM-DD HH:mm");
-            /*
-                            if (timeStart > timeEnd) {
-                                alert("El horario de desde no puede ser menor a la fecha de hasta.");
-                                $("#visita_desde").val("");
-                                $("#visita_hasta").val("");
-                                $("#valdiff").html("");
-                                return;
-                            }*/
+
             if (moment(timeEnd).isBefore(timeStart, 'time')) {
                 $("#aviso").show();
                 $("#avisoMensaje").html("El horario hasta no puede ser menor a desde.");
@@ -453,8 +435,7 @@
             $("#aviso").hide();
 
             $("#guardar_btn").addClass("disabled");
-            //get values
-            //hoy = new Date();
+
             let valdesde = $("#visita_desde").val();
             let valhasta = $("#visita_hasta").val();
 
@@ -536,27 +517,29 @@
                         window.location.href = "login.html";
                     }
                     let visitaslist = document.getElementById("visitaslist");
+                    let hayPresentados = false;
 
 
                     visitaslist.innerHTML = "";
 
-                    if (data["length"] === undefined) {
-                        visitaslist.innerHTML = '<p>No hay visitas cargadas.</p>';
+                    if (data["presentado"] !== undefined) {
+                        hayPresentados = data["presentado"];
                     }
 
-                    let hayPresentados = false;
+                    if (data["length"] === undefined) {
+                        visitaslist.innerHTML = '<p>No hay visitas cargadas.</p>';
+                    } else {
+                        for (i in data) {
+                            let element = data[i];
+                            visitas.push(element);
 
-                    for (i in data) {
-                        let element = data[i];
-                        visitas.push(element);
+                            let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Visita con superposicion horaria</a>' : '';
 
-                        let superpos = parseInt(element.cantidad_solapados) > 0 ? '<a class="ui orange circular label">Visita con superposicion horaria</a>' : '';
+                            let presentadoClass = element.presentado == "1" ? "disabled" :  "";
 
-                        let presentadoClass = element.presentado == "1" ? "disabled" : "";
+                            hayPresentados = element.presentado == "1";
 
-                        hayPresentados = element.presentado == "1";
-
-                        let elementTxt = `<div class="item">
+                            let elementTxt = `<div class="item">
                                               <div class="right floated content">
                                                   <button data-id="${element.id}" class="ui positive ${presentadoClass} icon button editar_visita">
                                                       <i data-id="${element.id}" class="icon edit"></i>
@@ -573,10 +556,10 @@
                                               ${superpos}
                                           </div>`;
 
-                        visitaslist.innerHTML += elementTxt;
-                        //let elementTxt = `<option Value="${data[i].id_pac}">${data[i].iniciales}</option>`;
-                        //visitaslist.innerHTML += elementTxt;
+                            visitaslist.innerHTML += elementTxt;
+                        }
                     }
+
                     $("#loadingDimmer").removeClass("active");
 
                     //Si hay presentados deshabilito el boton de agregar y muestro la placa de bloqueado

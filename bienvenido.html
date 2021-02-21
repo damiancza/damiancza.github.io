@@ -49,10 +49,10 @@
 <body>
     <div class="ui borderless menu">
         <div class="right menu">
-            <a href="calendar_pac.html" class="ui item">
+<!--             <a href="calendar_pac.html" class="ui item">
                 <div id="saltar_btn" class="ui button">Saltar</div>
             </a>
-        </div>
+ -->        </div>
 
     </div>
 
@@ -107,7 +107,7 @@
             $("#siguiente_button").click(function (e) {
                 e.preventDefault();
                 let currentSlide = $(".bienvenido").slick("slickCurrentSlide");
-                if (currentSlide >= 2) {
+                if (currentSlide >= 10) {
                     $("#siguiente_button").hide();
                     $("#entendido_button").show();
                 }
@@ -120,34 +120,15 @@
 
             $("#entendido_button").click(function () {
                 localStorage.setItem("bienvenido", true);
-                window.location.href = "calendar.html";
-            });
-
-            $("#saltar_btn").click(function () {
-                localStorage.setItem("bienvenido", true);
-                window.location.href = "calendar.html";
+                window.location.href = "login.html";
             });
 
         });
 
         function cargarPaginas() {
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            let jwtString = `Bearer ${user.jwt}`;
-
-            let myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
-            let requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow'
-            };
-
             let url = `${apiUrl}/bienvenidos.php`;
 
-            fetch(url, requestOptions)
+            fetch(url)
                 .then(function (res) {
                     return res.json();
                 }).then(function (data) {
@@ -178,11 +159,10 @@
 
                     $(".bienvenido").slick({
                         autoplay: false,
-                        dots: true,
+                        dots: false,
                         infinite: false,
                         speed: 1000,
                         slidesToShow: 1,
-
                     });
 
                 });

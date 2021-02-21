@@ -21,6 +21,9 @@
     <script src="lib/semantic.min.js"></script>
     <script src="lib/moment-with-locales.min.js"></script>
     <script src="lib/simpleUpload.min.js"></script>
+    <script src="js/globals.js"></script>
+    <script src="js/utils.js"></script>
+
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <style type="text/css">
@@ -62,6 +65,10 @@
             font-size: 50px;
             text-align: center;
             padding: 30px;
+        }
+
+        .no_visible {
+            display: none;
         }
     </style>
 </head>
@@ -105,7 +112,71 @@
                     </div>
                 </div>
 
-                <div class="ui segment sumario">
+                <div class="ui segment sumario no_visible">
+                    <h4 id="summarioHoras">Total horas: Total: <i class="custom circular info icon"></i>
+                    </h4>
+                    <div class="ui custom popup top bottom transition hidden">
+                        <p id="summarioHorasDetalle">
+                            Detalle de horas</b><br>Dias de semana <b>14hs</b> <br> Fin de
+                            semana
+                            <b>4hs</b><br> Feriados <b>0hs</b></br> <br>
+                            <b>Valores</b><br>
+                            Dias de semana $350<br>
+                            Fines de semana $450<br>
+                            Feriados $480<br>
+                        </p>
+                    </div>
+                    <h1 class="ui divider"></h1>
+                    <div class="ui compact labeled icon menu">
+
+                        <a id="presentar_horarios" style="display: none;" class="item">
+                            <i class="calendar outlook icon"></i>
+                            <div class="floating left ui icon blue circular label">
+                                1
+                            </div>
+                            Presentar <br>
+                            Horarios
+                        </a>
+                        <a id="descargar_horarios" style="display: none;" class="item">
+                            <i class="download icon"></i>
+                            <div class="floating left ui icon green circular label">
+                                1
+                            </div>
+                            Descargar <br>
+                            Horarios
+                        </a>
+
+                        <a id="presentar_factura" class="disabled item">
+                            <i class="receipt icon"></i>
+                            <div class="fact_label floating left ui icon grey circular label">2</div>
+                            Presentar <br>
+                            Factura
+                        </a>
+
+                        <a id="descargar_factura" style="display: none;" class="item">
+                            <i class="receipt icon"></i>
+                            <div class="fact_label floating left ui icon green circular label">2</div>
+                            Descargar <br>
+                            Factura
+                        </a>
+
+                        <a id="presentar_informe" class="disabled item">
+                            <div class="informe_label floating left ui icon grey circular label">3</div>
+                            <i class="edit outline icon"></i>
+                            Presentar <br>
+                            Informe
+                        </a>
+
+                        <a id="descargar_informe" style="display: none;" class="item">
+                            <div class="informe_label floating left ui icon green circular label">3</div>
+                            <i class="edit outline icon"></i>
+                            Descargar <br>
+                            Informe
+                        </a>
+                    </div>
+                </div>
+                <!--
+                <div class="ui segment sumario" style="display: none;">
                     <h5 id="summarioHoras">Total de horas: 63hs Total: $23.940,00</h5>
                     <p id="summarioHoras1">ds:<b>16.5</b> - fs:<b>12.5</b> - fe:<b>0</b></p>
                     <div class="ui huge buttons">
@@ -117,26 +188,28 @@
                                 class="edit outline icon"></i></button>
                     </div>
                 </div>
-
+            -->
             </div>
         </div>
-        <div class="ui grid calendario tipotarea">
-            <div class="column">
-                <div class="ui calendar" id="inline_calendar"></div>
+        <!--
 
-                <div class="ui icon message" style="display: none;">
-                    <i class="lock icon"></i>
-                    <div class="content">
-                        <div class="header">
-                            Este mes esta cerrado
+            <div class="ui grid calendario tipotarea" style="display: none;">
+                <div class="column">
+                    <div class="ui calendar" id="inline_calendar"></div>
+                    <div class="ui icon message" style="display: none;">
+                        <i class="lock icon"></i>
+                        <div class="content">
+                            <div class="header">
+                                Este mes esta cerrado
+                            </div>
+                            <p>Esta listo para la liquidacion.</p>
                         </div>
-                        <p>Esta listo para la liquidacion.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
+        -->
+    </div>
 
     <div id="importante_modal_dlg" class="ui tiny modal">
         <div class="header">
@@ -151,7 +224,7 @@
                     <p>Debera presentar los horarios correspondientes al mes de Octubre. </p>
                     <p>El plazo es del 1 al 5 de este mes para presentar las visitas correspondientes al mes de Octubre.
                     </p>
-                    <p>En caso de pasada esa fecha, los honorarios seran liquidados a partir del 15 del mes siguiente.
+                    <p>En caso de pasada esa fecha, los honorarios seran procesados a partir del 10 del mes siguiente.
                     </p>
                 </div>
             </div>
@@ -165,7 +238,7 @@
 
     <div id="presentacion_modal_dlg" class="ui tiny modal">
         <div class="header">
-            Presentacion Horaria
+            Presentar horarios
         </div>
         <div id="sendingPrDimmer" class="ui inverted dimmer">
             <div class="ui text loader">Enviando Presentacion</div>
@@ -213,10 +286,7 @@
             <h3 id="totalFacturaDescr">La factura correspondiente a Octubre 2020 debera tener un importe de:</h3>
             <h2 id="totalFactura">$23.940,00</h2>
 
-            <form id="formUpload" action="ajaxupload.php" method="post" enctype="multipart/form-data">
-                <input class="ui input" id="factura_file" type="file" accept="image/*,application/pdf" name="facfile" />
-                <!-- <input class="ui primary button" type="submit" value="Subir"> -->
-            </form>
+            <input class="ui input" id="factura_file" type="file" accept="image/*,application/pdf" name="facfile" />
 
             <div class="ui warning message">
                 <div class="header">
@@ -274,8 +344,6 @@
         </div>
     </div>
 
-    
-
     <div id="confirma_salir_dlg" class="ui modal">
         <div class="header">
             Advertencia
@@ -310,6 +378,14 @@
                 pac = localStorage.getItem("pac");
             } else {
                 pac = findGetParameter("pac");
+            }
+            if (pac === null) {
+                //Si es llamado sin parametro o no esta en localStorage, deslogueamos
+                localStorage.removeItem("user");
+                localStorage.removeItem("focusDate");
+                localStorage.removeItem("pac");
+                window.location.href = "login.html";
+                return true;
             }
 
             cargarVisitasCalendario(pac);
@@ -424,10 +500,9 @@
                                                               Aviso
                                                           </div>
                                                           <div class="content">
-                                                              <p>Se realizara la presentacion horaria, una vez confirmada no se podran actualizar ni editar
-                                                                  las
-                                                                  visitas del mes.<br>
-                                                                  Para pedir una rectificacion debera comunicarse con el administrador.</p>
+                                                              <p>Se realizara la presentacion horaria, una vez confirmada no se podr&aacute;ran actualizar ni editar
+                                                                  las visitas del mes<br>
+                                                                  Para pedir una rectificaci&oacute;n debera comunicarse con el administrador</p>
                                                           </div>
                                                       </div>`;
                     presentacionHorariaContent = presentacionHorariaContent.replace(/\./g, ',');
@@ -463,16 +538,14 @@
             });
 
             $('#factura_file').change(function () {
-                let url = `${apiUrl}/facupload.php`;
+                let url = `${apiUrl}/fact_upload.php`;
                 let user = JSON.parse(localStorage.getItem('user'));
 
                 let jwtString = `Bearer ${user.jwt}`;
 
                 $(this).simpleUpload(url, {
                     data: {
-                        "id": presentationData.id,
-                        "mes": presentationData.mes,
-                        "anio": presentationData.anio
+                        "id": presentationData.id
                     },
                     beforeSend: function (jqXHR, settings) {
                         jqXHR.setRequestHeader('MyAuthorization', jwtString);
@@ -551,6 +624,85 @@
                     $('#charnum').text('te quedan ' + char + ' caracteres.');
                 }
             });
+
+            $("#descargar_horarios").click(function (e) {
+                let month = focusDate._d.getMonth() + 1;
+                let year = focusDate._d.getFullYear();
+
+                let requestOptions = {
+                    method: 'GET',
+                    headers: getMyHeader(),
+                    redirect: 'follow'
+                };
+
+                let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&pdf`;
+
+                fetch(url, requestOptions)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = `presentacion-${month}-${year}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    });
+
+            });
+
+            $("#descargar_factura").click(function (e) {
+                let month = focusDate._d.getMonth() + 1;
+                let year = focusDate._d.getFullYear();
+
+                let requestOptions = {
+                    method: 'GET',
+                    headers: getMyHeader(),
+                    redirect: 'follow'
+                };
+
+                let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&factura`;
+
+                fetch(url, requestOptions)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = `factura-${month}-${year}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    });
+
+            });
+
+            $("#descargar_informe").click(function (e) {
+                let month = focusDate._d.getMonth() + 1;
+                let year = focusDate._d.getFullYear();
+
+                let requestOptions = {
+                    method: 'GET',
+                    headers: getMyHeader(),
+                    redirect: 'follow'
+                };
+
+                let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&informe`;
+
+                fetch(url, requestOptions)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = `informe-${month}-${year}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    });
+
+            });
+
         });
 
         // Get a value from the querystring
@@ -566,18 +718,9 @@
         }
 
         function cargarVisitasCalendario(pac) {
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            $('.calendario').hide();
-            let jwtString = `Bearer ${user.jwt}`;
-
-            let myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
             let requestOptions = {
                 method: 'GET',
-                headers: myHeaders,
+                headers: getMyHeader(),
                 redirect: 'follow'
             };
 
@@ -703,25 +846,112 @@
             let month = date.getMonth() + 1;
             let year = date.getFullYear();
 
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            let jwtString = `Bearer ${user.jwt}`;
-
-            let myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
             let requestOptions = {
                 method: 'GET',
-                headers: myHeaders,
+                headers: getMyHeader(),
                 redirect: 'follow'
             };
 
             let url = `${apiUrl}/presentaciones.php?year=${year}&month=${month}&pac=${pac}&presentacion`;
 
+            $(".sumario").hide();
+            fetch(url, requestOptions)
+                .then(function (res) {
+                    return res.json(); //error here
+                }).then(function (data) {
+                    presentationData = data;
+                    if (data.total_hs > 0) {
+                        $(".sumario").show();
+                        $(".sumario").removeClass("no_visible");
+                    } else {
+                        $(".sumario").hide();
+                        $(".sumario").addClass("no_visible");
+                        return;
+                    }
+
+                    let sumarioHoras = `Total de horas: ${data["total_hs"]}hs Total: $${data["total_pagar"]} <i class="custom circular info icon"></i>`;
+
+                    sumarioHoras = sumarioHoras.replace(/\./g, ',');
+                    $("#summarioHoras").html(sumarioHoras);
+
+                    sumarioHoras = `<b>Detalle de horas</b><br>
+                                    Dias de semana <b>${data["total_hs_ds"]}hs</b><br> 
+                                    Fin de semana <b>${data["total_hs_fs"]}hs</b><br> 
+                                    Feriados <b>${data["total_hs_fe"]}hs</b><br>
+                                    <b>Valores</b><br>
+                                    Dias de semana $${data["valor_hora_ds"]}<br>
+                                    Fines de semana $${data["valor_hora_fs"]}<br>
+                                    Feriados $${data["valor_hora_fe"]}<br>`;
+
+                    sumarioHoras = sumarioHoras.replace(/\./g, ',');
+                    $("#summarioHorasDetalle").html(sumarioHoras);
+
+                    $('.custom')
+                        .popup({
+                            popup: $('.custom.popup'),
+                            on: 'click'
+                        });
+
+                    $(".fact_label").removeClass("grey");
+                    $(".fact_label").removeClass("green");
+                    $(".fact_label").removeClass("blue");
+                    $(".informe_label").removeClass("grey");
+                    $(".informe_label").removeClass("green");
+                    $(".informe_label").removeClass("blue");
+
+                    $("#presentar_factura").addClass("disabled");
+                    $("#presentar_informe").addClass("disabled");
+
+                    if ("id" in data) {
+                        $("#presentar_horarios").hide();
+                        $("#descargar_horarios").show();
+
+                        //Si ya se presento el horario, habilitar la carga de factura
+                        if (data.factura == "S") {
+                            $("#descargar_factura").hide();
+                            $("#presentar_factura").show();
+                            $("#presentar_factura").removeClass("disabled");
+                            $(".fact_label").addClass("green");
+
+                            if (data.informe == "S") {
+                                $("#descargar_factura").show();
+                                $("#presentar_factura").hide();
+                                $(".fact_label").addClass("green");
+
+                                $("#descargar_informe").show();
+                                $("#presentar_informe").hide();
+                                $("#presentar_informe").addClass("disabled");
+                                $(".informe_label").addClass("green");
+                            } else {
+                                $("#descargar_informe").hide();
+                                $("#presentar_informe").show();
+                                $("#presentar_informe").removeClass("disabled");
+                                $(".informe_label").addClass("blue");
+                            }
+
+                        } else {
+                            $("#descargar_factura").hide();
+                            $("#presentar_factura").show();
+                            $("#presentar_factura").removeClass("disabled");
+                            $(".fact_label").addClass("blue");
+                        }
+
+                    } else {
+                        $("#presentar_horarios").show();
+                        $("#descargar_horarios").hide();
+
+                        $(".fact_label").addClass("grey");
+                        $(".informe_label").addClass("grey");
+                    }
+
+                });
+
+            /*
             $("#summarioHoras1").hide();
 
             //Al mandar, deshabilitamos todo
+            
+
             $("#presentar_horarios").addClass("disabled");
             $("#presentar_factura").addClass("disabled");
             $("#presentar_informe").addClass("disabled");
@@ -796,23 +1026,16 @@
                 }).catch((error) => {
                     console.log(error);
                 });
+            */
         }
 
         function enviarPresentacion() {
             let month = focusDate._d.getMonth() + 1;
             let year = focusDate._d.getFullYear();
 
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            let jwtString = `Bearer ${user.jwt}`;
-
-            let myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
             let requestOptions = {
                 method: 'POST',
-                headers: myHeaders,
+                headers: getMyHeader(),
                 redirect: 'follow'
             };
 
@@ -825,6 +1048,7 @@
                 }).then(function (data) {
                     $("#sendingPrDimmer").removeClass("active");
                     $("#presentacion_modal_dlg").modal('hide');
+                    $('#importante_modal_dlg').modal('show');
                     getTotalMonth(focusDate._d);
                     return;
                 }).catch((error) => {
@@ -834,19 +1058,11 @@
 
         function enviarInforme(informeData) {
             let idPresentacion = presentationData["id"];
-            let user = JSON.parse(localStorage.getItem('user'));
-
-            let jwtString = `Bearer ${user.jwt}`;
-
-            let myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("MyAuthorization", jwtString);
-
             let raw = JSON.stringify(informeData);
 
             let requestOptions = {
                 method: 'POST',
-                headers: myHeaders,
+                headers: getMyHeader(),
                 body: raw,
                 redirect: 'follow'
             };

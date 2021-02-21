@@ -20,6 +20,7 @@
     <!-- You MUST include jQuery before Fomantic -->
     <script src="lib/jquery.min.js"></script>
     <script src="lib/semantic.min.js"></script>
+    <script src="js/globals.js"></script>
     <link rel="stylesheet" type="text/css" href="lib/semantic.min.css">
 
     <style type="text/css">
@@ -59,13 +60,13 @@
                     <div class="field">
                         <div class="ui left icon input">
                             <i class="user icon"></i>
-                            <input id="username_input" type="text" name="username" placeholder="Nombre de usuario" autocomplete="off" value="">
+                            <input id="email_input" type="text" name="email" placeholder="Email" autocomplete="off">
                         </div>
                     </div>
                     <div class="field">
                         <div class="ui left icon input">
                             <i class="lock icon"></i>
-                            <input id="password_input" type="password" name="password" placeholder="Contrase&ntilde;a" value="">
+                            <input id="password_input" type="password" name="password" placeholder="Contrase&ntilde;a">
                         </div>
                     </div>
                     <button id="loginButton" class="ui fluid large primary submit button">Ingresar</button>
@@ -74,30 +75,139 @@
                     <p id="responseMessage"> </p>
                 </div>
             </form>
-            <div class="ui message">
+            <div id="recover_password" class="ui message">
                 ¿Olvido su contrase&ntilde;a? <a href="#">Recuperar</a>
             </div>
         </div>
     </div>
 
+    <div id="recover_password_dlg" class="ui tiny modal">
+        <i class="close icon"></i>
+        <div id="cabecera_visita_dlg" class="header">
+            Recuperar contrase&ntilde;a
+        </div>
+        <div class="content">
+            <div id="recover_form" class="ui grid form">
+                <div class="eight wide field">
+                    <label for="">Email</label>
+                    <input name="email" type="email">
+                </div>
+                <div class="eight wide field">
+                    <label for="">Dni</label>
+                    <input name="dni" type="text">
+                </div>
+                <div class="ui error message"></div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui black deny button">
+                Cancelar
+            </div>
+            <div id="guardar_btn" class="ui positive button">
+                Recuperar
+            </div>
+        </div>
+    </div>
+
     <script>
-        const apiUrl = "https://www.conectat.com.ar/api/login.php";
+        const apiUrl = baseUrl + "/api/login.php";
         document.addEventListener('DOMContentLoaded', function () {
+
+            $("#recover_password").click(function (e) {
+                e.preventDefault();
+                $("#recover_password_dlg").modal('show');
+            })
+
+            $("#recover_password_dlg").modal({
+                onShow: function () {
+                    let formVisita = $('#recover_form');
+
+                    formVisita.form({
+                        on: 'blur',
+                        fields: {
+                            email: {
+                                identifier: 'email',
+                                rules: [
+                                    {
+                                        type: 'email',
+                                        prompt: 'Por favor ingrese un e-mail valido'
+                                    }
+                                ]
+                            },
+                            dni: {
+                                identifier: 'dni',
+                                rules: [
+                                    {
+                                        type: 'empty',
+                                        prompt: 'Por favor ingrese un dni'
+                                    }
+                                ]
+                            }
+                        }
+                    });
+
+                    formVisita.form("clear");
+                },
+                onApprove: function (element) {
+                    let formVisita = $('#recover_form');
+
+                    if (!formVisita.form("validate form")) {
+                        return false;
+                    }
+
+                    // get all values
+                    let allFields = formVisita.form('get values');
+                    console.log(allFields);
+
+                    let myHeaders = new Headers();
+                    myHeaders.append("Content-Type", "application/json");
+
+                    let raw = JSON.stringify(allFields);
+
+                    let requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: raw,
+                        redirect: 'follow'
+                    };
+
+                    let recover_url = `${baseUrl}/api/recover.php`;
+                    $("#message").hide();
+                    fetch(recover_url, requestOptions)
+                        .then(function (res) {
+                            $('#recover_password_dlg').modal("hide");
+                            return res.json(); //error here
+                        }).then(function (data) {
+                            if (data.message != undefined) {
+                                $("#message").show();
+                                $("#responseMessage").html(data.message);
+                                return false;
+                            }
+
+                            return true;
+                        }).catch((error) => {
+                            console.log(error);
+                            return false;
+                        });
+                    return false;
+                }
+            });
+
 
             document.getElementById("loginButton").addEventListener("click", (e) => {
                 e.preventDefault();
-                let username = document.getElementById("username_input").value;
+                let email = document.getElementById("email_input").value;
                 let password = document.getElementById("password_input").value;
 
-                
-                if (username == "") {
+
+                if (email == "") {
                     document.querySelector(".ui.message").style.display = "block";
                     document.getElementById("responseMessage").innerHTML = "Ingrese un nombre de usuario valido.";
                     return;
                 } else {
                     document.querySelector(".ui.message").style.display = "none";
                 }
-                
+
                 if (password == "") {
                     document.querySelector(".ui.message").style.display = "block";
                     document.getElementById("responseMessage").innerHTML = "Ingrese una contrase&ntilde;a v&aacute;lida.";
@@ -105,17 +215,17 @@
                 } else {
                     document.querySelector(".ui.message").style.display = "none";
                 }
-                
+
                 document.getElementById("loadingDimmer").classList.add("active");
-                login(username, password);
+                login(email, password);
             });
         });
 
-        function login(username, password) {
+        function login(email, password) {
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ email, password })
             };
 
             return fetch(apiUrl, requestOptions)
@@ -125,27 +235,30 @@
                 })
                 .then(user => {
                     //Si vino error mostramos
-                    if (!user.message != undefined) {
+                    if (user.message != undefined) {
                         document.querySelector(".ui.message").style.display = "block";
                         document.getElementById("responseMessage").innerHTML = user.message;
                         document.getElementById("loadingDimmer").classList.remove("active");
                     } else {
                         document.querySelector(".ui.message").style.display = "none";
                     }
-                    
+
                     // login successful if there's a jwt token in the response
                     if (user.jwt != undefined) {
                         // store user details and jwt token in local storage to keep user logged in between page refreshes
                         localStorage.setItem('user', JSON.stringify(user));
-                        window.location.href = "pacientes.html";
+                        if (localStorage.getItem("profile") === null) {
+                            window.location.href = "profile.html";
+                        } else {
+                            window.location.href = "pacientes.html";
+                        }
                     }
-                    
+
                     return user;
                 });
         }
 
     </script>
-    <!-- <script src="js/main.js"></script> -->
 </body>
 
 </html>

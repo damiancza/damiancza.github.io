@@ -1,0 +1,1 @@
+const baseUrl = "https://www.conectat.com.ar";

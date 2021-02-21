@@ -268,17 +268,46 @@
                             type: 'empty',
                             prompt: 'Por favor ingrese el email'
                         }]
-                    }
+                    },
+                    telefono: {
+                        identifier: 'telefono',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el telefono'
+                        }]
+                    },
+                    cbu_alias: {
+                        identifier: 'cbu_alias',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el cbu o alias'
+                        }]
+                    },
+                    titular_cuenta: {
+                        identifier: 'titular_cuenta',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el titular de la cuenta'
+                        }]
+                    },
+                    cuil_titular: {
+                        identifier: 'cuil_titular',
+                        rules: [{
+                            type: 'empty',
+                            prompt: 'Por favor ingrese el cuil del titular de la cuenta'
+                        }]
+                    },
                 }
             });
 
             cargarDatosPerfil();
 
             $("#saveProfile").click(function () {
-                $('#formulario').form("validate form");
-                //$('#formulario1').form("validate form");
-
-                salvarDatosPerfil();
+                if ($('#formulario').form("validate form")) {
+                    salvarDatosPerfil();
+                    return true;
+                }
+                return false;
             });
 
             $("#change_password_btn").click(function () {
@@ -351,6 +380,8 @@
 
                     console.log(data);
                     $("#saveDimmer").removeClass("active");
+                    localStorage.setItem("profile", true);
+                    window.location.href = "pacientes.html";
 
                     return;
                 }).catch((error) => {

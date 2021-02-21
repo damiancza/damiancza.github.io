@@ -46,28 +46,28 @@
       <h1 class="title">Sistema Admistracion Visitas</h1>
     </div>
   </div>
-  <!--  <script src="js/main.js"></script> -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (localStorage.getItem("user") === null) {
-        window.location.href = "login.html";
+      if (localStorage.getItem("bienvenido") === null) {
+        window.location.href = "bienvenido.html";
+      } else if (localStorage.getItem("perfil") === null) {
+        window.location.href = "pacientes.html";
       } else {
-        let user = JSON.parse(localStorage.getItem("user"));
-        let expireTime = user.expireAt;
-        let currentDate = new Date();
-        let expireAt = new Date(expireTime * 1000);
-
-        if (expireAt < currentDate) {
+        if (localStorage.getItem("user") === null) {
           window.location.href = "login.html";
         } else {
-          if (localStorage.getItem("bienvenido") === null) {
-            window.location.href = "bienvenido.html";
+          let user = JSON.parse(localStorage.getItem("user"));
+          let expireTime = user.expireAt;
+          let currentDate = new Date();
+          let expireAt = new Date(expireTime * 1000);
+
+          if (expireAt < currentDate) {
+            window.location.href = "login.html";
           } else {
             window.location.href = "pacientes.html";
           }
         }
       }
-
     });
   </script>
 </body>

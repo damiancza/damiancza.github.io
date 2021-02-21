@@ -1,11 +1,10 @@
-var cacheName = 'hello-pwa';
+var cacheName = 'control-horario';
 var filesToCache = [
   '/',
   '/index.html',
   
   
   '/css/style.css',
-  '/js/main.js',
 
   '/calendar.html',
   '/bienvenido.html',
