@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belgrano Norte App - Horarios de Trenes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0072CE, #005BA1);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .hero {
+            background: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .hero h2 {
+            color: #0072CE;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features {
+            padding: 3rem 0;
+            background: #f9f9f9;
+        }
+        
+        .features h3 {
+            text-align: center;
+            color: #0072CE;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: #0072CE;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .download {
+            background: #0072CE;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .download h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #FDB813;
+            color: #333;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #e6a712;
+        }
+        
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .accent {
+            color: #FDB813;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">🚆 Belgrano Norte App</div>
+            <div class="tagline">Horarios de trenes en tu bolsillo</div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Consulta los horarios del tren Belgrano Norte</h2>
+            <p>La aplicación más completa para consultar horarios, planificar viajes y estar siempre informado sobre el servicio ferroviario desde Retiro hasta Villa Rosa.</p>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h3>Características principales</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🗓️</div>
+                    <h4>Horarios completos</h4>
+                    <p>Consulta horarios para días laborables, sábados, domingos y feriados</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚉</div>
+                    <h4>23 estaciones</h4>
+                    <p>Desde Retiro hasta Villa Rosa, todas las estaciones de la línea</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h4>Planificador de viajes</h4>
+                    <p>Encuentra el mejor horario entre cualquier par de estaciones</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h4>Funciona sin internet</h4>
+                    <p>Accede a los horarios aunque no tengas conexión</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h4>Diseño moderno</h4>
+                    <p>Interface intuitiva y fácil de usar con Material Design</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Rápida y ligera</h4>
+                    <p>Aplicación optimizada para un rendimiento excepcional</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="download">
+        <div class="container">
+            <h3>Descarga <span class="accent">Belgrano Norte App</span></h3>
+            <p>Disponible para dispositivos Android 7.0 o superior</p>
+            <a href="#" class="download-btn">Descargar en Google Play</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Belgrano Norte App. Desarrollado para facilitar tu viaje en tren.</p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">Aplicación no oficial del servicio ferroviario Belgrano Norte</p>
+        </div>
+    </footer>
+</body>
+</html>
