@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-01-15T10:30:00Z",
+  "environments": {
+    "development": {
+      "api_url": "http://192.168.0.12:5002/api/",
+      "name": "Desarrollo Local",
+      "description": "Servidor de desarrollo en red local"
+    },
+    "production": {
+      "api_url": "https://florist-yukon-dylan-mw.trycloudflare.com/api/",
+      "name": "Producción",
+      "description": "Servidor productivo en CloudFlare"
+    }
+  },
+  "default_environment": "production",
+  "fallback_url": "http://192.168.0.12:5002/api/"
+}
