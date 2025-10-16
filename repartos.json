@@ -8,7 +8,7 @@
       "description": "Servidor de desarrollo en red local"
     },
     "production": {
-      "api_url": "https://booking-deaf-closing-nomination.trycloudflare.com/api/",
+      "api_url": "https://ryan-hydraulic-hang-photo.trycloudflare.com/api/",
       "name": "Producción",
       "description": "Servidor productivo en CloudFlare"
     }
